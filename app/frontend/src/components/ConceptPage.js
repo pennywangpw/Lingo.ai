@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Box, Button, Container, Grid, LinearProgress, Collapse, IconButton, Divider } from '@mui/material'
+import { Box, Button, Container, Grid, LinearProgress, Collapse, IconButton, Divider, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { NavLink } from "react-router-dom";
 import { fetchUserConcepts } from '../store/concepts';
 // import { fetchUserProgress } from '../store/users';
 import { useTheme } from '@emotion/react';
 import LockIcon from '@mui/icons-material/Lock';
-import CheckIcon from '@mui/icons-material/Check';
+// import CheckIcon from '@mui/icons-material/Check';
 import BeginnerConcepts from './ConceptsPage-Beginner';
 import IntermediateConcepts from './ConceptsPage-Intermediate';
 
@@ -15,8 +15,8 @@ function ConceptPage() {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.session.user)
   const concepts = Object.values(useSelector((state) => state.concepts));
-  const progressState = useSelector((state) => state.users.progress);
-  const progress = progressState && Object.values(progressState)
+  // const progressState = useSelector((state) => state.users.progress);
+  // const progress = progressState && Object.values(progressState)
   // const concepts = Object.values(useSelector((state) => state.concepts.concepts));
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
@@ -36,7 +36,8 @@ function ConceptPage() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await dispatch(fetchUserConcepts(user.uid));
+
+      await dispatch(fetchUserConcepts(user?.uid));
       // await dispatch(fetchUserProgress(user.uid))
       setLoading(false);
     };
@@ -60,15 +61,24 @@ function ConceptPage() {
   ).sort((a, b) => b.concept_name.localeCompare(a.concept_name));
 
   let conceptCount = 0;
+  let topicsCount = 0;
+  let passedConcepts = 0
 
   currentConcepts?.map(concept => {
     if (concept.status === true) conceptCount++
+    concept.topics.map(topic => {
+      if (topic.passes === 3) topicsCount++
+    })
     return conceptCount
   })
 
+  if (topicsCount === 4) passedConcepts = 1
+
+  console.log("TOPICC", topicsCount);
+
   let conceptPercentage = (conceptCount / currentConcepts?.length) * 100
 
-
+  console.log(currentConcepts);
   if (loading) {
     return <LinearProgress />;
   }
@@ -102,18 +112,37 @@ function ConceptPage() {
               : (<p>Pass all the concepts to get your Lingo.ai Advanced Champion Badge.</p>)
           )}
         </Box>
-        <Box px={50}>
-          <LinearProgress
-            variant='determinate'
-            value={conceptPercentage}
-            sx={{
-              height: 25,
-            }}
-            color='secondary'
-          />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
+          }}
+        >
+          <Box sx={{ position: 'relative', display: 'inline-flex', width: '75%', margin: 'auto' }}>
+            <LinearProgress
+              variant="determinate"
+              value={conceptPercentage}
+              sx={{ height: 25, width: '100%', borderRadius: '3px' }}
+              color='secondary'
+            />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: 'absolute',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Typography fontSize="small" fontWeight="bold" color="textSecondary">{`${Math.round(conceptPercentage)}%`}</Typography>
+            </Box>
+          </Box>
         </Box>
       </Box>
-
       <Grid container justifyContent='center' py={5} spacing={5}>
         {currentConcepts?.map(concept => (
           concept.status === true || concept.concept_name === "Vocabulary" ? (
@@ -129,7 +158,7 @@ function ConceptPage() {
                     flexDirection: "column",
                     alignContent: "center",
                     padding: "10px 20px",
-                    width: "400px",
+                    width: "250px",
                     height: "200px",
                   }}>
                   <Box
@@ -146,21 +175,43 @@ function ConceptPage() {
                       }}>
 
                       <h3>{concept.concept_name}</h3>
-                      {concept.progress === true &&
+                      {/* {concept.progress === true &&
                         <CheckIcon sx={{
                           ml: 1,
                           color: `${theme.palette.completion.good}`,
                         }} />
-                      }
+                      } */}
                     </Box>
                   </Box>
                   <p>{concept.level}</p>
-                  <LinearProgress
+                  {/* <LinearProgress
                     variant='determinate'
                     value={concept.topicsPassed * 100}
                     sx={{ height: 15 }}
                     color='divider'
-                  />
+                  /> */}
+                  <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%', margin: 'auto' }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={concept.topicsPassed * 100}
+                      sx={{ height: 25, width: '100%', borderRadius: '3px' }}
+                      color='divider'
+                    />
+                    <Box
+                      sx={{
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        position: 'absolute',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Typography fontSize="small" fontWeight="bold" color="textSecondary">{`${Math.round(concept.topicsPassed * 100)}%`}</Typography>
+                    </Box>
+                  </Box>
                 </Box>
               </Button>
             </Grid>
@@ -180,7 +231,7 @@ function ConceptPage() {
                     flexDirection: "column",
                     alignContent: "center",
                     padding: "10px 20px",
-                    width: "400px",
+                    width: "250px",
                     height: "200px"
                   }}>
                   <Box
@@ -190,14 +241,36 @@ function ConceptPage() {
                     <h3>{concept.concept_name}</h3>
                   </Box>
                   <p>{concept.level}</p>
-                  <LinearProgress
+                  {/* <LinearProgress
                     variant='determinate'
                     value={0}
                     sx={{
                       height: 15
                     }}
                     color="text"
-                  />
+                  /> */}
+                  <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%', margin: 'auto' }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={0}
+                      sx={{ height: 25, width: '100%', borderRadius: '3px' }}
+                      color='text'
+                    />
+                    <Box
+                      sx={{
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        position: 'absolute',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+
+                    </Box>
+                  </Box>
                 </Box>
                 <LockIcon sx={{
                   position: 'absolute',
@@ -210,7 +283,8 @@ function ConceptPage() {
             </Grid>
           )))}
       </Grid>
-      {(user?.level === "Intermediate" || user?.level === "Advanced") &&
+      {
+        (user?.level === "Intermediate" || user?.level === "Advanced") &&
         <>
           <Divider />
           <Box>

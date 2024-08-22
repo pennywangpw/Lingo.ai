@@ -3,7 +3,7 @@ const { sendEmailVerification } = require("firebase/auth");
 // Access your API key as an environment variable (see "Set up your API key" above)
 const { API_KEY } = process.env;
 
-const genAI = new GoogleGenerativeAI(api);
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 
 //generate questions from ai based on different topic
@@ -98,10 +98,17 @@ async function generateQuestionsByAI(concept_name, topic, native_language, level
                 For example:
                 Question: The weather is very __ today.
                 Options:
+<<<<<<< HEAD
+                A) hot (mainit)
+                B) warm (mainit-init)
+                C) cold (malamig)
+                D) rainy (maulan)
+=======
                 hot (${native_language})
                 warm (${native_language})
                 cold (${native_language})
                 rainy (${native_language})
+>>>>>>> origin/vu-redux
                 Ensure that the explanation for the correct answer is also provided in ${native_language} using this` + jsonschema
 
             }
@@ -149,10 +156,17 @@ async function generateQuestionsByAI(concept_name, topic, native_language, level
                 For example:
                 Question: Choose the sentence that uses the indefinite article \"a\" correctly:
                 Options:
+<<<<<<< HEAD
+                A)"The professor gave a lecture on philosophy.",
+                B)"Professor gave lecture on philosophy.",
+                C)"A professor gave a lecture on philosophy."
+                D)"The professor gave the lecture on a philosophy."
+=======
                 "The professor gave a lecture on philosophy.",
                 "Professor gave lecture on philosophy.",
                 "A professor gave a lecture on philosophy."
                 "The professor gave the lecture on a philosophy."
+>>>>>>> origin/vu-redux
 
                 Ensure that the explanation for the correct answer is also provided in ${native_language} using this` + jsonschema
 
@@ -173,10 +187,17 @@ async function generateQuestionsByAI(concept_name, topic, native_language, level
                 For example:
                 Question: Hello, I’m Emily , a Project Manager at Tech, Inc. I ______ leading cross-functional teams to develop innovative software solutions.
                 Options:
+<<<<<<< HEAD
+                A)"specialize in",
+                B)"good at",
+                C)"expert on"
+                D)"good on"
+=======
                 "specialize in",
                 "good at",
                 "expert on"
                 "good on"
+>>>>>>> origin/vu-redux
 
                 Ensure that the explanation for the correct answer is also provided in ${native_language} using this` + jsonschema
 
@@ -202,13 +223,23 @@ async function generateQuestionsByAI(concept_name, topic, native_language, level
 
                     Options:
 
+<<<<<<< HEAD
+                    A) His name is John.
+
+                    B) He lives in New York.
+
+                    C) He is my best friend.
+
+                    D) He is very funny.
+=======
                      His name is John.
 
                      He lives in New York.
 
                      He is my best friend.
-
+                     
                      He is very funny.
+>>>>>>> origin/vu-redux
 
 
 
@@ -232,10 +263,17 @@ async function generateQuestionsByAI(concept_name, topic, native_language, level
                     Person B: I wake up at 7 AM and then I _______________.
 
                     Options:
+<<<<<<< HEAD
+                    A) watch TV
+                    B) go to bed
+                    C) read a book
+                    D) eat breakfast
+=======
                      watch TV
                      go to bed
                      read a book
                      eat breakfast
+>>>>>>> origin/vu-redux
                 ensure answer and explaination in ${native_language} using this` + jsonschema
 
             }
@@ -261,12 +299,22 @@ async function generateQuestionsByAI(concept_name, topic, native_language, level
 
                     Options:
 
+<<<<<<< HEAD
+                    A) How much is this one?
+
+                    B) What color is it?
+
+                    C) How tall is it?
+
+                    D) Where is the fitting room?
+=======
                      How much is this one?
 
                      What color is it?
 
                      How tall is it?
                      Where is the fitting room?
+>>>>>>> origin/vu-redux
 
                 ensure answer and explaination in ${native_language} using this` + jsonschema
 

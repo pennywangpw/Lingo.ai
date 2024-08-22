@@ -6,6 +6,9 @@ import { getAttemptByDeckIdFromDB } from "../services/deckService";
 
 // Action Types
 
+const { db } = require("../firebase/firebaseConfig");
+const { collection, getDocs, getDoc, doc, addDoc, updateDoc } = require("firebase/firestore");
+
 export const LOAD_USER_ATTEMPT = "userAttempts/LOAD_USER_ATTEMPT";
 export const ADD_USER_ATTEMPT = "userAttempts/ADD_USER_ATTEMPT";
 export const UPDATE_USER_ATTEMPT = "userAttempts/UPDATE_USER_ATTEMPT";
@@ -40,26 +43,56 @@ export const fetchUserAttempt = (deckId) => async (dispatch) => {
   };
 
 // Add User Attempt Thunk
-export const startUserAttempt = (userId, deckId, passes = 0, totalQuestions = 3, createdAt = new Date().toISOString()) => async (dispatch) => {
+// export const startUserAttempt = (userId, deckId, passes = 0, totalQuestions = 3, createdAt = new Date().toISOString()) => async (dispatch) => {
+//   try {
+//       const attemptData = { deckId, passes, totalQuestions, createdAt };
+//       const newAttemptId = await AddUserAttemptToDB(attemptData, userId); // API call
+
+//       dispatch(addUserAttempt(newAttemptId));
+
+//       // Return the new attempt ID
+//       return { payload: newAttemptId };
+//   } catch (error) {
+//       console.error("Error creating user attempt:", error);
+//       throw error; // Throw the error to handle it where the thunk is called
+//   }
+// };
+
+export const createUserAttempt = (userId, deckId) => async (dispatch) => {
   try {
-      const attemptData = { deckId, passes, totalQuestions, createdAt };
-      const newAttemptId = await AddUserAttemptToDB(attemptData, userId); // API call
+      const userDocRef = doc(db, 'users', userId);
+      const userAttemptsRef = collection(userDocRef, 'attempts')
 
-      dispatch(addUserAttempt(newAttemptId));
-      
-      // Return the new attempt ID
-      return { payload: newAttemptId };
+      // Create the attempt data (you'll need to define this structure)
+      const attemptData = {
+        deckId,
+      };
+
+       // Add the attempt document to the attempts collection
+    const docRef = await addDoc(userAttemptsRef, attemptData);
+
+    // Get the new attempt ID (document ID)
+    const newAttemptId = docRef.id;
+
+    // Update the deck's attemptId field
+    const deckDocRef = doc(userDocRef, 'decks', deckId);
+    await updateDoc(deckDocRef, { attemptId: newAttemptId });
+
+    // Dispatch the action to add the attempt to your Redux store
+    dispatch(addUserAttempt(newAttemptId));
+    return { payload: newAttemptId };
   } catch (error) {
-      console.error("Error creating user attempt:", error);
-      throw error; // Throw the error to handle it where the thunk is called
+    console.error("Error creating user attempt:", error);
+    throw error; // Throw the error to handle it where the thunk is called
   }
-};
+}
 
-  
-  export const modifyUserAttempt = (userId, attemptId, deckId, questionId, answer) => async (dispatch) => {
+
+  export const modifyUserAttempt = (userId, id, attemptId, answer, deckId) => async (dispatch) => {
     try {
-      const checkAttempt = await checkAnswerInDB(userId, questionId, attemptId, answer, deckId); // API call
+      const checkAttempt = await checkAnswerInDB(userId, id, attemptId, answer, deckId); // API call
       dispatch(updateUserAttempt(attemptId, checkAttempt));
+      return checkAttempt;
     } catch (error) {
       console.error("Error updating user attempt:", error);
     }

@@ -4,6 +4,7 @@ import { addCardsToDeckInDB, createDeckInDB } from "../services/deckService";
 const { db } = require("../firebase/firebaseConfig");
 const { collection, getDoc, doc, getDocs } = require("firebase/firestore");
 // const { generateQuestionsByAI } = require("../models/aiModel");
+// const { generateQuestionsByAI } = require("../models/aiModel2");
 const { generateQuestionsByAI } = require("../models/aiModel3");
 
 export const LOAD_QUESTIONS = () => "questions/LOAD_QUESTIONS";

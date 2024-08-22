@@ -18,6 +18,7 @@ const loadOneDeck = (deck) => ({
   deck,
 });
 
+
 // Thunk Actions
 export const fetchDecks = (userId, topicId) => async (dispatch) => {
   try {
@@ -36,6 +37,10 @@ export const fetchDecks = (userId, topicId) => async (dispatch) => {
     console.error("Error fetching decks:", error);
   }
 };
+
+
+
+
 
 export const fetchOneDeck = (deckId) => async (dispatch) => {
   try {
@@ -74,7 +79,7 @@ export const createAttemptIfNotExists = (deckId, attemptId) => async (dispatch, 
   }
 
   const docRef = doc(db, "decks", deckId);
-  
+
   try {
     await setDoc(docRef, { attemptId }, { merge: true });
     console.log("Attempt ID set successfully in deck:", deckId);

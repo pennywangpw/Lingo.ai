@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { Box, Button, Container, Grid, LinearProgress } from '@mui/material'
+import { Box, Button, Container, Grid, LinearProgress, Typography } from '@mui/material'
 import { NavLink } from "react-router-dom";
 import { fetchUserConcepts } from '../store/concepts';
 import { fetchUserProgress } from '../store/users';
 import { useTheme } from '@emotion/react';
-import CheckIcon from '@mui/icons-material/Check';
+// import CheckIcon from '@mui/icons-material/Check';
 import LockIcon from '@mui/icons-material/Lock';
 
 function IntermediateConcepts({ user, concepts }) {
@@ -62,15 +62,35 @@ function IntermediateConcepts({ user, concepts }) {
                     ) : (<p>Pass all the concepts to get your Lingo.ai Intermediate Champion Badge.</p>)
                     }
                 </Box>
-                <Box px={50}>
-                    <LinearProgress
-                        variant='determinate'
-                        value={conceptPercentage}
-                        sx={{
-                            height: 25,
-                        }}
-                        color='secondary'
-                    />
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        width: '100%',
+                    }}
+                >
+                    <Box sx={{ position: 'relative', display: 'inline-flex', width: '75%', margin: 'auto' }}>
+                        <LinearProgress
+                            variant="determinate"
+                            value={conceptPercentage}
+                            sx={{ height: 25, width: '100%', borderRadius: '3px' }}
+                            color='secondary'
+                        />
+                        <Box
+                            sx={{
+                                top: 0,
+                                left: 0,
+                                bottom: 0,
+                                right: 0,
+                                position: 'absolute',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <Typography fontSize="small" fontWeight="bold" color="textSecondary">{`${Math.round(conceptPercentage)}%`}</Typography>
+                        </Box>
+                    </Box>
                 </Box>
             </Box>
 
@@ -89,7 +109,7 @@ function IntermediateConcepts({ user, concepts }) {
                                         flexDirection: "column",
                                         alignContent: "center",
                                         padding: "10px 20px",
-                                        width: "400px",
+                                        width: "250px",
                                         height: "200px",
                                     }}>
                                     <Box
@@ -106,21 +126,37 @@ function IntermediateConcepts({ user, concepts }) {
                                             }}>
 
                                             <h3>{concept.concept_name}</h3>
-                                            {concept.progress === true &&
+                                            {/* {concept.progress === true &&
                                                 <CheckIcon sx={{
                                                     ml: 1,
                                                     color: `${theme.palette.completion.good}`,
                                                 }} />
-                                            }
+                                            } */}
                                         </Box>
                                     </Box>
                                     <p>{concept.level}</p>
-                                    <LinearProgress
-                                        variant='determinate'
-                                        value={concept.topicsPassed * 100}
-                                        sx={{ height: 15 }}
-                                        color='divider'
-                                    />
+                                    <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%', margin: 'auto' }}>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={concept.topicsPassed * 100}
+                                            sx={{ height: 25, width: '100%', borderRadius: '3px' }}
+                                            color='divider'
+                                        />
+                                        <Box
+                                            sx={{
+                                                top: 0,
+                                                left: 0,
+                                                bottom: 0,
+                                                right: 0,
+                                                position: 'absolute',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+                                            <Typography fontSize="small" fontWeight="bold" color="textSecondary">{`${Math.round(concept.topicsPassed * 100)}%`}</Typography>
+                                        </Box>
+                                    </Box>
                                 </Box>
                             </Button>
                         </Grid>
@@ -140,7 +176,7 @@ function IntermediateConcepts({ user, concepts }) {
                                         flexDirection: "column",
                                         alignContent: "center",
                                         padding: "10px 20px",
-                                        width: "400px",
+                                        width: "250px",
                                         height: "200px"
                                     }}>
                                     <Box
@@ -150,14 +186,28 @@ function IntermediateConcepts({ user, concepts }) {
                                         <h3>{concept.concept_name}</h3>
                                     </Box>
                                     <p>{concept.level}</p>
-                                    <LinearProgress
-                                        variant='determinate'
-                                        value={0}
-                                        sx={{
-                                            height: 15
-                                        }}
-                                        color="text"
-                                    />
+                                    <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%', margin: 'auto' }}>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={0}
+                                            sx={{ height: 25, width: '100%', borderRadius: '3px' }}
+                                            color='text'
+                                        />
+                                        <Box
+                                            sx={{
+                                                top: 0,
+                                                left: 0,
+                                                bottom: 0,
+                                                right: 0,
+                                                position: 'absolute',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+
+                                        </Box>
+                                    </Box>
                                 </Box>
                                 <LockIcon sx={{
                                     position: 'absolute',

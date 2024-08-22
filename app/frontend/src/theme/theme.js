@@ -42,7 +42,7 @@ export const darkTheme = createTheme({
       contrastText: "#f1e9e9",
     },
     divider: {
-      main: "#63c0b6",
+      main: "#485575",
     },
     text: {
       main: '#f1e9e9',

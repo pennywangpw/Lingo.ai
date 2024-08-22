@@ -90,7 +90,7 @@ const NavBar = () => {
       >
         <NavLink to="/" exact={true} activeClassName="active">
           <img
-            src="../../logo.png"
+            src="/logo.png"
             alt="Lingo.ai"
             style={{ width: "200px", height: "auto" }}
           />

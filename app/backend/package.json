@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@google/generative-ai": "^0.16.0",
+    "axios": "^1.7.3",
+    "express": "^4.19.2",
+    "firebase": "^10.12.4",
+    "node-fetch": "^3.3.2",
+    "redux-thunk": "^3.1.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.8",
+    "@babel/core": "^7.25.2",
+    "@babel/node": "^7.25.0",
+    "@babel/preset-env": "^7.25.3"
+  }
+}
