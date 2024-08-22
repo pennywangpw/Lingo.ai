@@ -5,7 +5,7 @@
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/athena-codes/a-A-summer-hackathon.git
+git clone https://github.com/pennywangpw/a-A-summer-hackathon.git
 ```
 
 ### Install Dependencies
@@ -20,12 +20,12 @@ npm install
 ### Backend
 ```bash
 cd backend
-pip install -r requirements.txt
+npm install
 ```
 
 ### Start back end server
 ```bash
-go to root of project
+cd backend
 node server.js
 ```
 
@@ -39,9 +39,6 @@ Open your web browser and navigate to http://localhost:3000 to use the applicati
 
 ### Contributing
 We welcome contributions to improve the app! Please submit a pull request with your changes or improvements.
-
-### License
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ### Acknowledgments
 Special thanks to the creators of the AI tools and APIs that made this project possible.
