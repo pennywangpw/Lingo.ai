@@ -1,13 +1,16 @@
 import { addQuestionsToDB } from "../services/aiService";
 import { addCardsToDeckInDB, createDeckInDB } from "../services/deckService";
+import { generateQuestionsByAI } from '../links/aiModel4';
+
 
 const { db } = require("../firebase/firebaseConfig");
 const { collection, getDoc, doc, getDocs } = require("firebase/firestore");
+// const { generateQuestionsByAI } = require(aiModel4)
 // const { generateQuestionsByAI } = require("../models/aiModel");
 // const { generateQuestionsByAI } = require("../models/aiModel2");
 // const { generateQuestionsByAI } = require("../models/aiModel3");
-// const { generateQuestionsByAI } = require("../../../backend/models/aiModel3");
-import aiModel3 from 'aiModel3';
+// const { generateQuestionsByAI } = require("../../../backend/models/aiModel4");
+
 
 
 

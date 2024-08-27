@@ -17,7 +17,7 @@ const getConcepts = async (req, res) => {
     }
 };
 
-// Controller to get a specific concept by id
+// Controller to get a specific concept by id-x
 const getConcept = async (req, res) => {
     const { conceptId } = req.params;
     try {
@@ -39,7 +39,7 @@ const getTopicsByConcept = async (req, res) => {
     }
 }
 
-// Controller to add a new concept
+// Controller to add a new concept-x
 const addConcept = async (req, res) => {
     const { concept_name, level, status } = req.body;
     try {
@@ -50,7 +50,7 @@ const addConcept = async (req, res) => {
     }
 };
 
-// Controller to update an existing concept
+// Controller to update an existing concept-x
 const updateConcept = async (req, res) => {
     const { conceptId } = req.params;
     const { concept_name, level, status } = req.body;
@@ -62,7 +62,7 @@ const updateConcept = async (req, res) => {
     }
 };
 
-// Controller to get a specific concept by id
+// Controller to get a specific concept by id-x
 const getConceptById = async (req, res) => {
     const { conceptId } = req.params;
     try {
@@ -73,7 +73,7 @@ const getConceptById = async (req, res) => {
     }
 };
 
-// Controller to remove a concept
+// Controller to remove a concept-x
 const removeConcept = async (req, res) => {
     const { conceptId } = req.params;
     try {

@@ -54,7 +54,7 @@ const getUserById = async (req, res) => {
   }
 };
 
-// Get user progress
+// Get user progress-{progress:{uid,username,concepts:[{id,status,level,topics}]}}
 const getUserProgress = async (req, res) => {
   const { id } = req.params;
   try {

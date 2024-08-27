@@ -8,6 +8,7 @@ const { getDecksFromDB, createDeckInDB,
 const { doc, getDoc, addDoc, setDoc, collection } = require('firebase/firestore');
 const { db } = require('../firebase/firebaseConfig');
 
+//get all decks- decks:[{createdAt,archived, topic_id,leel, userId, id, cards}]
 const getAllDecks = async (req, res) => {
     try {
         const decks = await getDecksFromDB();
@@ -17,7 +18,7 @@ const getAllDecks = async (req, res) => {
     }
 }
 
-
+//get deck by deckId
 const getDeck = async (req, res) => {
     const { deckId } = req.params;
     try {
@@ -28,19 +29,7 @@ const getDeck = async (req, res) => {
     }
 }
 
-// const createDeck = async (req, res) => {
-//     const { userId, topic_id, createdAt = new Date().toISOString(), archived = false } = req.body;
-//     try {
-//         const deckInfo = await createDeckInDB({ userId, topic_id, createdAt, archived });
-//         const deckId = deckInfo.id;
-//         const deckQuestions = await addCardsToDeckInDB(deckId, userId);
-
-//         res.status(201).json({ message: 'Deck created', deckInfo, deckQuestions });
-//     } catch (error) {
-//         res.status(500).json({ message: `Error creating deck: ${error.message}` });
-//     }
-// };
-
+//create a new deck
 const createDeck = async (req, res) => {
     const { userId, aiGeneratedRequestId, createdAt = new Date().toISOString(), archived = false } = req.body;
     try {
@@ -77,7 +66,7 @@ const createDeck = async (req, res) => {
 };
 
 
-
+// remove card from deck -x
 const removeCardFromDeck = async (req, res) => {
     const { deckId } = req.params;
     try {
@@ -88,7 +77,7 @@ const removeCardFromDeck = async (req, res) => {
     }
 }
 
-
+// remove a deck -x
 const removeDeck = async (req, res) => {
     const { deckId } = req.params;
     try {
@@ -148,8 +137,8 @@ const getAttemptbyDeck = async (req, res) => {
         res.status(200).json({ attempt });
     } catch (error) {
         res.status(500).json({ message: error.message });
-  
-  }
+
+    }
 }
 
 module.exports = { getAllDecks, getDeck, createDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck };

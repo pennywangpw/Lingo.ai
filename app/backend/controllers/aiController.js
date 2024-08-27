@@ -1,6 +1,6 @@
 const { addQuestionsToDB, getQuestionsByUserIdFromDB } = require('../services/aiService');
 // const { generateQuestionsByAI } = require('../models/aiModel');
-const { generateQuestionsByAI } = require('../models/aiModel3');
+const { generateQuestionsByAI } = require('../models/aiModel4');
 
 const { options } = require('../routes/userRoutes');
 const { db } = require('../firebase/firebaseConfig');
@@ -11,16 +11,7 @@ const { doc, getDoc } = require('firebase/firestore');
 
 
 //the place i assebly ai model AND ai service
-// user can get all questions he/she had
-const getAllQuestionsbyAI = async (req, res) => {
-    const { userId } = req.params;
-    try {
-        const allQuestions = await getQuestionsByUserIdFromDB(userId);
-        res.status(200).json(allQuestions);
-    } catch (error) {
-        res.status(500).json({ message: `Error fetching user>ai_generated: ${error.message}` });
-    }
-}
+
 
 
 // get question from AI and store in db
@@ -97,6 +88,5 @@ const addCardQuestions = async (req, res) => {
 
 
 module.exports = {
-    addCardQuestions,
-    getAllQuestionsbyAI
+    addCardQuestions
 };
