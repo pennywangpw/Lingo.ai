@@ -25,6 +25,8 @@ function TopicsPage() {
   const progressState = useSelector((state) => state.users.progress);
   const progress = progressState && Object.values(progressState)
   const concepts = Object.values(useSelector((state) => state.concepts));
+  console.log("這裡是progress : ", progress)
+  console.log("這裡是progress userId: ", userId)
 
   const theme = useTheme()
 

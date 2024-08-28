@@ -40,23 +40,42 @@ const loadConceptTopics = (conceptId, topics) => ({
 //   }
 // };
 
+// export const fetchUserConcepts = (userId) => async (dispatch) => {
+//   try {
+
+//     const progressDocRef = doc(db, "progress", userId);
+
+//     const conceptRef = collection(progressDocRef, 'concepts');
+
+//     const conceptDoc = await getDocs(conceptRef);
+
+//     const concepts = conceptDoc.docs.map((doc) => ({
+//       id: doc.id,
+//       ...doc.data(),
+//     }))
+
+//     console.log("concept ", concepts)
+
+//     dispatch(loadConcepts(concepts));
+//   } catch (error) {
+//     throw new Error("Error fetching progress: " + error.message);
+//   }
+// };
+
 export const fetchUserConcepts = (userId) => async (dispatch) => {
   try {
 
-    const progressDocRef = doc(db, "progress", userId);
+    const response = await fetch(`/api/users/${userId}/progress`);
 
-    const conceptRef = collection(progressDocRef, 'concepts');
+    if (response.ok) {
+      const userprogress = await response.json()
+      dispatch(loadConcepts(userprogress.progress.concepts));
+      console.log("userprogress : ", userprogress)
+      return userprogress
+    } else {
+      console.error("Response failed:", response.statusText);
+    }
 
-    const conceptDoc = await getDocs(conceptRef);
-
-    const concepts = conceptDoc.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
-
-    console.log("concept ", concepts)
-
-    dispatch(loadConcepts(concepts));
   } catch (error) {
     throw new Error("Error fetching progress: " + error.message);
   }
@@ -124,6 +143,7 @@ const conceptsReducer = (state = initialState, action) => {
       action.concepts.forEach((concept) => {
         newState[concept.id] = concept;
       });
+      console.log("newstate: ", newState)
       return newState;
     }
     case LOAD_ONE_CONCEPT: {
