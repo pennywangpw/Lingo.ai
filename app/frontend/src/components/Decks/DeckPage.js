@@ -16,30 +16,60 @@ import { fetchOneTopic } from "../../store/topics";
 import { NavLink, useHistory } from "react-router-dom";
 import { createUserAttempt } from "../../store/attempt";
 import { fetchUserConcepts } from "../../store/concepts";
+import { fetchUserProgress } from '../../store/users';
 import { useTheme } from "@mui/material/styles";
 
 function DeckPage() {
+  //1.get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
+  //2.get user progress in order to get concept_level
+  //3.get user in order to get language
   const dispatch = useDispatch();
   const history = useHistory();
-  const { decks } = useSelector((state) => state.decks);
+
   const { conceptId, topicId } = useParams();
-  const topic = useSelector((state) => state.topics[topicId]);
-  const user = useSelector((state) => state.session.user);
+  //get currentUser
+  const user = useSelector((state) => state.session.user)
+  const userId = user.uid;
+  const { decks } = useSelector((state) => state.decks);
+  // const decks = useSelector((state) => state.decks);
+
+
   const [loading, setLoading] = useState(false);
-  const concepts = Object.values(useSelector((state) => state.concepts));
-  const conceptFilter = concepts.find((concept) => conceptId === concept.id);
-  const decksFilter = decks?.filter((deck) => topicId === deck.topic_id);
+  // const concepts = Object.values(useSelector((state) => state.concepts));
+  // const conceptFilter = concepts.find((concept) => conceptId === concept.id);
   const theme = useTheme();
 
+  //get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
+  const decksFilter = decks?.filter((deck) => userId == deck.userId && topicId === deck.topic_id);
+  // const decksFilter = decks?.filter((deck) => topicId === deck.topic_id);
+
+
+  console.log("DeckPage decks :", decks)
+  console.log("DeckPage decksFilter :", decksFilter)
+
+  //get CurrentUser progress to get current concept
+  const progressState = useSelector((state) => state.users.progress);
+  const progress = progressState && Object.values(progressState)
+  console.log("DeckPage progress :", progress)
+  const currentConcept = progress?.[0].concepts.filter(concept => concept.id == conceptId)
+  console.log("DeckPage currentConcept :", currentConcept)
+
+
+  //get current topic
+  const topic = useSelector((state) => state.topics[topicId]);
+  console.log("topic : ", topic)
 
   useEffect(() => {
     if (user && topicId) {
       setLoading(true);
       dispatch(fetchDecks(user.uid, topicId)).finally(() => setLoading(false));
+      dispatch(fetchUserProgress(userId))
       dispatch(fetchOneTopic(topicId));
-      dispatch(fetchUserConcepts(user.uid));
+
+      // dispatch(fetchUserConcepts(user.uid));
     }
   }, [dispatch, user, topicId]);
+
 
   const handleGenerateQuestions = async (e) => {
     e.preventDefault();
@@ -47,12 +77,11 @@ function DeckPage() {
     try {
       await dispatch(
         addQuestions(
-          conceptFilter.concept_name,
+          currentConcept.concept_name,
           topic.topic_name,
           user.native_language,
-          conceptFilter.level,
-          topicId,
-          user.uid
+          currentConcept.level,
+          topicId
         )
       );
       dispatch(fetchDecks(user.uid, topicId));
@@ -62,6 +91,28 @@ function DeckPage() {
       setLoading(false);
     }
   };
+  // //original handleGenerateQuestions
+  // const handleGenerateQuestions = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   try {
+  //     await dispatch(
+  //       addQuestions(
+  //         currentConcept.concept_name,
+  //         topic.topic_name,
+  //         user.native_language,
+  //         currentConcept.level,
+  //         topicId,
+  //         user.uid
+  //       )
+  //     );
+  //     dispatch(fetchDecks(user.uid, topicId));
+  //   } catch (error) {
+  //     console.log("Error generating questions:", error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleStartAttempt = async (deckId) => {
     try {
@@ -117,7 +168,7 @@ function DeckPage() {
         <>
           {/* Check if topic is loaded before trying to access topic_name */}
           <h1 style={{ marginBottom: 0 }}>{topic ? topic.topic_name : "Loading topic..."}</h1>
-          <h3 style={{ marginTop: 0 }}>{conceptFilter?.level}</h3>
+          <h3 style={{ marginTop: 0 }}>{currentConcept?.level}</h3>
           <Container sx={{
             display: "grid",
             justifyContent: "center"

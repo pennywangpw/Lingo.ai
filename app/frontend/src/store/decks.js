@@ -19,20 +19,34 @@ const loadOneDeck = (deck) => ({
 });
 
 
+// //original fetchDecks
+// export const fetchDecks = (userId, topicId) => async (dispatch) => {
+//   try {
+//     const userDocRef = doc(db, 'users', userId);
+//     const userDoc = await getDoc(userDocRef);
+//     if (!userDoc.exists()) {
+//       throw new Error('User not found');
+//     }
+//     const userDecksCollectionRef = collection(userDocRef, 'decks');
+//     const userDecksSnapshot = await getDocs(userDecksCollectionRef);
+//     const userDecks = userDecksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+//     dispatch(loadDecks(userDecks));
+//   } catch (error) {
+//     console.error("Error fetching decks:", error);
+//   }
+// };
+
+
 // Thunk Actions
-export const fetchDecks = (userId, topicId) => async (dispatch) => {
+export const fetchDecks = () => async (dispatch) => {
   try {
-
-    const userDocRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-        throw new Error('User not found');
+    const response = await fetch(`/api/decks/all`)
+    if (response.ok) {
+      const alldecks = await response.json()
+      console.log("check if i get alldecks: ", alldecks.decks)
+      dispatch(loadDecks(alldecks.decks));
     }
-    const userDecksCollectionRef = collection(userDocRef, 'decks');
-    const userDecksSnapshot = await getDocs(userDecksCollectionRef);
-    const userDecks = userDecksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    dispatch(loadDecks(userDecks));
   } catch (error) {
     console.error("Error fetching decks:", error);
   }

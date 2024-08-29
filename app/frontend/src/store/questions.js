@@ -27,55 +27,76 @@ const add = (question) => ({
   question,
 });
 
+//original addQuestions
+// export const addQuestions =
+//   (concept_name, topic_name, user_native_language, concept_level, topicId, userId) => async (dispatch) => {
+//     try {
+//       let questionData = await generateQuestionsByAI(
+//         concept_name,
+//         topic_name,
+//         user_native_language,
+//         concept_level,
+//         topicId
+//       );
+//       console.log("questionData: ", questionData);
+
+//       dispatch(
+//         add({
+//           concept_name,
+//           topic_name,
+//           user_native_language,
+//           concept_level,
+//           topicId,
+//         })
+//       );
+
+//       if (questionData) {
+//         const question_from_ai = await addQuestionsToDB(userId, {
+//           questionData,
+//         });
+//         console.log("Created questions successfully:", question_from_ai);
+
+
+//         // Create a new deck in the database
+//         const deck = await createDeckInDB({
+//           userId,
+//           topic_id: topicId,
+//           createdAt: new Date(),
+//           archived: false,
+//         });
+
+//         console.log("Deck created successfully:", deck);
+
+//         // Add the generated questions as cards to the deck
+//         const cardsAdded = await addCardsToDeckInDB(deck.id, userId, question_from_ai);
+
+//         console.log("Cards added to deck successfully:", cardsAdded);
+
+//         return cardsAdded;
+//       }
+//     } catch (error) {
+//       console.error("Error during sign up:", error);
+//       throw error;
+//     }
+//   };
 
 export const addQuestions =
-  (concept_name, topic_name, user_native_language, concept_level, topicId, userId) => async (dispatch) => {
+  (concept_name, topic, native_language, level, topic_id) => async (dispatch) => {
+    console.log("payload for ai: ", concept_name, topic, native_language, level, topic_id)
     try {
-      let questionData = await generateQuestionsByAI(
-        concept_name,
-        topic_name,
-        user_native_language,
-        concept_level,
-        topicId
-      );
-      console.log("questionData: ", questionData);
+      const response = await fetch(`/api/ai/create-questions`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(concept_name, topic, native_language, level, topic_id)
+      })
 
-      dispatch(
-        add({
-          concept_name,
-          topic_name,
-          user_native_language,
-          concept_level,
-          topicId,
-        })
-      );
-
-      if (questionData) {
-        const question_from_ai = await addQuestionsToDB(userId, {
-          questionData,
-        });
-        console.log("Created questions successfully:", question_from_ai);
-
-
-        // Create a new deck in the database
-        const deck = await createDeckInDB({
-          userId,
-          topic_id: topicId,
-          createdAt: new Date(),
-          archived: false,
-        });
-
-        console.log("Deck created successfully:", deck);
-
-        // Add the generated questions as cards to the deck
-        const cardsAdded = await addCardsToDeckInDB(deck.id, userId, question_from_ai);
-
-        console.log("Cards added to deck successfully:", cardsAdded);
-
-        return cardsAdded;
+      if (response.ok) {
+        const generatedQuestion = response.json()
+        dispatch(add(generatedQuestion))
       }
+
     } catch (error) {
-      console.error("Error during sign up:", error);
+      console.error("Error during add question:", error);
       throw error;
     }
   };
