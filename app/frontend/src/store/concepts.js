@@ -69,6 +69,7 @@ export const fetchUserConcepts = (userId) => async (dispatch) => {
     const response = await fetch(`/api/users/${userId}/progress`);
 
     if (response.ok) {
+      console.log("res: ", response)
       const userprogress = await response.json()
       dispatch(loadConcepts(userprogress.progress.concepts));
       console.log("userprogress : ", userprogress)

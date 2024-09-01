@@ -44,7 +44,7 @@ export const fetchDecks = () => async (dispatch) => {
     const response = await fetch(`/api/decks/all`)
     if (response.ok) {
       const alldecks = await response.json()
-      console.log("check if i get alldecks: ", alldecks.decks)
+
       dispatch(loadDecks(alldecks.decks));
     }
   } catch (error) {

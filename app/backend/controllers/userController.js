@@ -69,7 +69,7 @@ const getUserProgress = async (req, res) => {
 
 const updateUserProgress = async (req, res) => {
   const { id } = req.params;
-  console.log("update user progress route is hit", id);
+  // console.log("update user progress route is hit", id);
   try {
     await updateUserProgressFromDB(id);
     const progress = await getProgressFromDB(id);

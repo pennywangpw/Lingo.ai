@@ -5,7 +5,7 @@ const { collection, addDoc, getDocs, updateDoc, getDoc, doc, query, where, Times
 const getDecksFromDB = async () => {
     try {
         const querySnapshot = await getDocs(collection(db, 'decks'));
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return querySnapshot.docs.map(doc => ({ id: doc.id, deck_name: doc.id.slice(0, 4), ...doc.data() }));
     } catch (error) {
         throw new Error('Error fetching decks: ' + error.message);
     }
@@ -188,7 +188,7 @@ const addCardsToDeckInDB = async (deckId, userId, aiGeneratedRequestId) => {
 
         // Update the deck with the new cards
         await setDoc(deckRef, { ...deckDoc.data(), cards: deck }, { merge: true });
-        console.log('deckdeckdeck',deck )
+        console.log('deckdeckdeck', deck)
         return deck;
     } catch (error) {
         throw new Error('Error adding card to deck: ' + error.message);

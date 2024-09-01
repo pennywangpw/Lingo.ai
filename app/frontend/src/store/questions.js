@@ -81,18 +81,27 @@ const add = (question) => ({
 //   };
 
 export const addQuestions =
-  (concept_name, topic, native_language, level, topic_id) => async (dispatch) => {
-    console.log("payload for ai: ", concept_name, topic, native_language, level, topic_id)
+  (concept_name, topic_id, user_native_language, user_level, userId) => async (dispatch) => {
+    console.log("payload for ai: ", concept_name, topic_id, user_native_language, user_level, userId)
+    let payload = {
+      concept_name: concept_name,
+      topic_id: topic_id,
+      user_native_language: user_native_language,
+      user_level: user_level,
+      userId: userId
+    }
+    console.log("payload is here : ", payload)
     try {
       const response = await fetch(`/api/ai/create-questions`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(concept_name, topic, native_language, level, topic_id)
+        body: JSON.stringify(payload)
       })
 
       if (response.ok) {
-        const generatedQuestion = response.json()
-        dispatch(add(generatedQuestion))
+        const generatedQuestionId = await response.json()
+        console.log("我拿到了 generatedQuestionId: ", generatedQuestionId)
+        dispatch(add(generatedQuestionId))
       }
 
     } catch (error) {
@@ -106,7 +115,8 @@ const initialState = {};
 const questionsReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_QUESTION:
-      return { ...state, user: action.payload };
+      console.log("這裡是存入redux store裡面的 ...state, user: action.payload: ", action)
+      return { ...state, user: action.question };
     default:
       return state;
   }

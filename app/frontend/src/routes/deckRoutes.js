@@ -1,5 +1,7 @@
 const express = require('express');
-const { getAllDecks, getDeck, createDeck, addCardsToDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck } = require('../controllers/deckController');
+// const { getAllDecks, getDeck, createDeck, addCardsToDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck } = require('../controllers/deckController');
+const { getAllDecks, getDeck, createDeck, addCardsToDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck } = require('../../../backend/controllers/deckController');
+
 const router = express.Router();
 
 router.get('/all', getAllDecks);
@@ -22,5 +24,3 @@ router.get('/:deckId/attempt', getAttemptbyDeck);
 
 
 module.exports = router;
-
-module.exports = router

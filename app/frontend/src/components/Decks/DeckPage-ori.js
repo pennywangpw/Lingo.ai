@@ -25,21 +25,27 @@ function DeckPage() {
   //3.get user in order to get language
   const dispatch = useDispatch();
   const history = useHistory();
-  const { conceptId, topicId } = useParams();
-  const [loading, setLoading] = useState(false);
-  const theme = useTheme();
 
+  const { conceptId, topicId } = useParams();
   //get currentUser
   const user = useSelector((state) => state.session.user)
   const userId = user.uid;
   const { decks } = useSelector((state) => state.decks);
+  // const decks = useSelector((state) => state.decks);
 
+
+  const [loading, setLoading] = useState(false);
+  // const concepts = Object.values(useSelector((state) => state.concepts));
+  // const conceptFilter = concepts.find((concept) => conceptId === concept.id);
+  const theme = useTheme();
 
   //get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
   const decksFilter = decks?.filter((deck) => userId == deck.userId && topicId === deck.topic_id);
+  // const decksFilter = decks?.filter((deck) => topicId === deck.topic_id);
+
+
   console.log("DeckPage decks :", decks)
   console.log("DeckPage decksFilter :", decksFilter)
-
 
   //get CurrentUser progress to get current concept
   const progressState = useSelector((state) => state.users.progress);
@@ -60,6 +66,7 @@ function DeckPage() {
       dispatch(fetchUserProgress(userId))
       dispatch(fetchOneTopic(topicId));
 
+      // dispatch(fetchUserConcepts(user.uid));
     }
   }, [dispatch, user, topicId]);
 
@@ -70,20 +77,13 @@ function DeckPage() {
     try {
       await dispatch(
         addQuestions(
-          currentConcept[0].concept_name,
-          topic.id,
+          currentConcept.concept_name,
+          topic.topic_name,
           user.native_language,
-          currentConcept[0].level,
-          userId
-          // currentConcept.concept_name,
-          // topic.topic_name,
-          // user.native_language,
-          // currentConcept.level,
-          // topicId
+          currentConcept.level,
+          topicId
         )
       );
-      //add new question to deck
-
       dispatch(fetchDecks(user.uid, topicId));
     } catch (error) {
       console.log("Error generating questions:", error.message);
@@ -219,6 +219,7 @@ function DeckPage() {
                           }}
                           onClick={() => handleStartAttempt(deck.id)}
                         >
+                          {console.log("deck 每一個deck:", deck)}
                           <h3>{`Deck #${deck.deck_name}
                             `}</h3>
                           {/* <Typography variant="body1">

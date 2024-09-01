@@ -31,7 +31,7 @@ const getQuestionsByUserIdFromDB = async (uid) => {
 }
 
 
-//ai generate question
+
 const addQuestionsToDB = async (userId, { questionData }) => {
     try {
         const userRef = doc(db, 'users', userId);
@@ -41,16 +41,41 @@ const addQuestionsToDB = async (userId, { questionData }) => {
         const newDocRef = doc(aiGeneratedRequestsRef); // Create a new document reference
 
         // Add the question data to the new document in the collection
-        await setDoc(newDocRef, {
+        newQuestions = {
             questionData,
             createdAt: new Date()
-        });
+        }
+        await setDoc(newDocRef, newQuestions);
 
-        return newDocRef.id; // Return the ID of the newly created document
+
+        return newQuestions;
     } catch (error) {
         throw new Error('Error adding questions to DB: ' + error.message);
     }
 }
+
+
+//original
+//ai generate question
+// const addQuestionsToDB = async (userId, { questionData }) => {
+//     try {
+//         const userRef = doc(db, 'users', userId);
+//         const aiGeneratedRequestsRef = collection(userRef, 'ai_generated_requests');
+//         // const deckRef = doc(db, 'decks', userId);
+//         // const aiGeneratedRequestsRef = collection(deckRef, "ai_generated_requests");
+//         const newDocRef = doc(aiGeneratedRequestsRef); // Create a new document reference
+
+//         // Add the question data to the new document in the collection
+//         await setDoc(newDocRef, {
+//             questionData,
+//             createdAt: new Date()
+//         });
+
+//         return newDocRef.id; // Return the ID of the newly created document
+//     } catch (error) {
+//         throw new Error('Error adding questions to DB: ' + error.message);
+//     }
+// }
 
 
 

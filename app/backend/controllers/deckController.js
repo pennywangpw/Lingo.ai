@@ -33,9 +33,9 @@ const getDeck = async (req, res) => {
 const createDeck = async (req, res) => {
     const { userId, aiGeneratedRequestId, createdAt = new Date().toISOString(), archived = false } = req.body;
     try {
-        console.log('Starting createDeck function');
+        // console.log('Starting createDeck function');
         // Retrieve the topic_id based on aiGeneratedRequestId
-        console.log('Fetching AI Generated Request document...');
+        // console.log('Fetching AI Generated Request document...');
         const aiGeneratedRequestRef = doc(db, 'users', userId, 'ai_generated_requests', aiGeneratedRequestId);
         const aiGeneratedRequestDoc = await getDoc(aiGeneratedRequestRef);
 

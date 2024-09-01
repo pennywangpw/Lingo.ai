@@ -56,6 +56,7 @@ const getUserById = async (req, res) => {
 
 // Get user progress
 const getUserProgress = async (req, res) => {
+  console.log("這裡是前端的getUserProgress ")
   const { id } = req.params;
   try {
     const progress = await getProgressFromDB(id);

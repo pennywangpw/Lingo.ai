@@ -3,12 +3,12 @@ const { sendEmailVerification } = require("firebase/auth");
 // Access your API key as an environment variable (see "Set up your API key" above)
 const { API_KEY } = process.env;
 
-const genAI = new GoogleGenerativeAI("API_KEY");
+const genAI = new GoogleGenerativeAI("");
 
 
 //generate questions from ai based on different topic
 async function generateQuestionsByAI(concept_name, topic, native_language, level, topic_id) {
-    console.log("am i hitting generateVocabularyQuestionsByAI functions and check the user level: ", concept_name, topic, native_language, level)
+    console.log("am i hitting generateVocabularyQuestionsByAI functions and check the user level: ", concept_name, topic, native_language, level, topic_id)
     // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
 
