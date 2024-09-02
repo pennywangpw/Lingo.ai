@@ -6,8 +6,16 @@ const { collection, getDocs, doc, updateDoc, setDoc, getDoc, FieldValue } = requ
 // Action Types
 export const LOAD_DECKS = "concepts/LOAD_DECKS";
 export const LOAD_ONE_DECK = "concepts/LOAD_ONE_DECK";
+export const CREATE_NEW_DECK = "concepts/CREATE_NEW_DECK";
+
 
 // Action Creators
+
+const createNewDeck = (deck) => ({
+  type: CREATE_NEW_DECK,
+  deck,
+});
+
 const loadDecks = (decks) => ({
   type: LOAD_DECKS,
   decks,
@@ -37,6 +45,31 @@ const loadOneDeck = (deck) => ({
 //   }
 // };
 
+
+export const createDeck = (userId, aiGeneratedRequestId) => async (dispatch) => {
+  let payload = {
+    userId,
+    aiGeneratedRequestId
+  }
+  try {
+    const response = await fetch(`/api/decks/new`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    if (response.ok) {
+      const newdeck = await response.json()
+
+      dispatch(createNewDeck(newdeck.decks));
+
+      // const alldecks = await response.json()
+
+      // dispatch(loadDecks(alldecks.decks));
+    }
+  } catch (error) {
+    console.error("Error fetching decks:", error);
+  }
+};
 
 // Thunk Actions
 export const fetchDecks = () => async (dispatch) => {
@@ -128,6 +161,11 @@ const decksReducer = (state = initialState, action) => {
       return {
         ...state,
         selectedDeck: action.deck,
+      };
+    case CREATE_NEW_DECK:
+      return {
+        ...state,
+        newDeck: action.deck,
       };
     default:
       return state;

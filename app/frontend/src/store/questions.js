@@ -22,9 +22,9 @@ const load = (questions) => ({
   questions,
 });
 
-const add = (question) => ({
+const add = (questionId) => ({
   type: ADD_QUESTION,
-  question,
+  questionId,
 });
 
 //original addQuestions
@@ -116,7 +116,7 @@ const questionsReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_QUESTION:
       console.log("這裡是存入redux store裡面的 ...state, user: action.payload: ", action)
-      return { ...state, user: action.question };
+      return { ...state, questionId: action.questionId };
     default:
       return state;
   }

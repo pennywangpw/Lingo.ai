@@ -17,6 +17,8 @@ import { NavLink, useHistory } from "react-router-dom";
 import { createUserAttempt } from "../../store/attempt";
 import { fetchUserConcepts } from "../../store/concepts";
 import { fetchUserProgress } from '../../store/users';
+import { createDeck } from '../../store/decks';
+
 import { useTheme } from "@mui/material/styles";
 
 function DeckPage() {
@@ -53,6 +55,11 @@ function DeckPage() {
   const topic = useSelector((state) => state.topics[topicId]);
   console.log("topic : ", topic)
 
+  //get new generated questions id
+  const questions = useSelector((state) => state.session.questions)
+  console.log("我拿出來的question : ", questions)
+
+
   useEffect(() => {
     if (user && topicId) {
       setLoading(true);
@@ -82,7 +89,9 @@ function DeckPage() {
           // topicId
         )
       );
+      //需要先拿到aiquestion id
       //add new question to deck
+      await dispatch(createDeck(user.uid, questions.questionId));
 
       dispatch(fetchDecks(user.uid, topicId));
     } catch (error) {
