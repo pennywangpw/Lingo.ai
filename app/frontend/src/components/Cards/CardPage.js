@@ -36,6 +36,7 @@ function CardPage() {
   const [feedback, setFeedback] = useState({});
   //const attemptId = useSelector((state) => state.userAttempts);
   const { attemptId } = location.state || {};
+  console.log("i don't think i can get this attemptid ", attemptId)
   const topicName = deck?.cards?.[0]?.questionData?.topic;
   const topicLevel = deck?.level;
 
@@ -107,9 +108,8 @@ function CardPage() {
                     width: "300px",
                     height: "450px",
                     borderRadius: "3px",
-                    border: `1.5px solid ${
-                      theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
-                    }`,
+                    border: `1.5px solid ${theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
+                      }`,
                   }}
                 >
                   <Box
@@ -127,9 +127,8 @@ function CardPage() {
                       backgroundColor: `${theme.palette.background.main}`,
                       height: "150px",
                       padding: "10px",
-                      borderTop: `1.5px solid ${
-                        theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
-                      }`,
+                      borderTop: `1.5px solid ${theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
+                        }`,
                       overflow: "auto",
                       display: "flex",
                       alignContent: "center",
@@ -192,9 +191,8 @@ function CardPage() {
                       width: "300px",
                       height: "450px",
                       borderRadius: "3px",
-                      border: `1.5px solid ${
-                        theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
-                      }`,
+                      border: `1.5px solid ${theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
+                        }`,
                     }}
                   >
                     <Box
@@ -220,9 +218,8 @@ function CardPage() {
                         backgroundColor: `${theme.palette.background.main}`,
                         height: "150px",
                         padding: "10px",
-                        borderTop: `1.5px solid ${
-                          theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
-                        }`,
+                        borderTop: `1.5px solid ${theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
+                          }`,
                         overflow: "auto",
                         display: "flex",
                         alignContent: "center",
@@ -249,9 +246,8 @@ function CardPage() {
                       width: "300px",
                       height: "450px",
                       borderRadius: "3px",
-                      border: `1.5px solid ${
-                        theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
-                      }`,
+                      border: `1.5px solid ${theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
+                        }`,
                     }}
                   >
                     <Box
@@ -277,9 +273,8 @@ function CardPage() {
                         backgroundColor: `${theme.palette.background.main}`,
                         height: "150px",
                         padding: "10px",
-                        borderTop: `1.5px solid ${
-                          theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
-                        }`,
+                        borderTop: `1.5px solid ${theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
+                          }`,
                         overflow: "auto",
                         display: "flex",
                         alignItems: "center",
@@ -287,13 +282,13 @@ function CardPage() {
                         flexDirection: "column"
                       }}
                     >
-                        {/* <Typography sx={{ ml: 2 }}>
+                      {/* <Typography sx={{ ml: 2 }}>
                           {feedback.correctAnswer}
                           </Typography> */}
-                          <CloseIcon
-                            sx={{ color: theme.palette.completion.poor }}
-                            />
-                        <p>Correct answer: {feedback.correctAnswer}</p>
+                      <CloseIcon
+                        sx={{ color: theme.palette.completion.poor }}
+                      />
+                      <p>Correct answer: {feedback.correctAnswer}</p>
                     </Box>
                   </Card>
                 </Grid>

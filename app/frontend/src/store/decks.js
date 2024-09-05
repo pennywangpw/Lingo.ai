@@ -47,6 +47,7 @@ const loadOneDeck = (deck) => ({
 
 
 export const createDeck = (userId, aiGeneratedRequestId) => async (dispatch) => {
+  console.log("----createDeck userId, aiGeneratedRequestId: ", userId, aiGeneratedRequestId)
   let payload = {
     userId,
     aiGeneratedRequestId

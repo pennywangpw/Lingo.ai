@@ -14,7 +14,7 @@ import {
 import { addQuestions } from "../../store/questions";
 import { fetchOneTopic } from "../../store/topics";
 import { NavLink, useHistory } from "react-router-dom";
-import { createUserAttempt } from "../../store/attempt";
+import { createUserAttempt, InitialUserAttempt } from "../../store/attempt";
 import { fetchUserConcepts } from "../../store/concepts";
 import { fetchUserProgress } from '../../store/users';
 import { createDeck } from '../../store/decks';
@@ -30,6 +30,7 @@ function DeckPage() {
   const { conceptId, topicId } = useParams();
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
+  let deckId;
 
   //get currentUser
   const user = useSelector((state) => state.session.user)
@@ -39,25 +40,24 @@ function DeckPage() {
 
   //get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
   const decksFilter = decks?.filter((deck) => userId == deck.userId && topicId === deck.topic_id);
-  console.log("DeckPage decks :", decks)
-  console.log("DeckPage decksFilter :", decksFilter)
+  console.log("decksFilter 需要deck id: ", decksFilter)
+  if (decksFilter.length !== 0) {
+    deckId = decksFilter[0].id
 
+  }
 
   //get CurrentUser progress to get current concept
   const progressState = useSelector((state) => state.users.progress);
   const progress = progressState && Object.values(progressState)
-  console.log("DeckPage progress :", progress)
   const currentConcept = progress?.[0].concepts.filter(concept => concept.id == conceptId)
-  console.log("DeckPage currentConcept :", currentConcept)
 
 
   //get current topic
   const topic = useSelector((state) => state.topics[topicId]);
-  console.log("topic : ", topic)
 
   //get new generated questions id
-  const questions = useSelector((state) => state.session.questions)
-  console.log("我拿出來的question : ", questions)
+  const newQuestionId = useSelector((state) => state.questions.questionId)
+  console.log("我拿出來的question : ", newQuestionId)
 
 
   useEffect(() => {
@@ -70,6 +70,22 @@ function DeckPage() {
     }
   }, [dispatch, user, topicId]);
 
+  // Use useEffect to monitor changes in newQuestionId, create a new deck once newQuestionId is generated
+  useEffect(() => {
+    if (newQuestionId) {
+      console.log("是否有進入這個條件~");
+      dispatch(createDeck(user.uid, newQuestionId)).then(() => {
+        dispatch(fetchDecks(user.uid, topicId));
+      });
+    }
+  }, [newQuestionId, dispatch, user.uid, topicId]);
+
+
+  //initial
+  let passes = 0
+  let totalQuestions = 3
+  let createdAt = ""
+  let newAttemptId = ""
 
   const handleGenerateQuestions = async (e) => {
     e.preventDefault();
@@ -82,18 +98,20 @@ function DeckPage() {
           user.native_language,
           currentConcept[0].level,
           userId
-          // currentConcept.concept_name,
-          // topic.topic_name,
-          // user.native_language,
-          // currentConcept.level,
-          // topicId
         )
       );
-      //需要先拿到aiquestion id
-      //add new question to deck
-      await dispatch(createDeck(user.uid, questions.questionId));
+      // initial attempt
+      newAttemptId = await dispatch(
+        InitialUserAttempt(
+          userId,
+          deckId,
+          passes,
+          totalQuestions,
+          createdAt
+        )
+      )
 
-      dispatch(fetchDecks(user.uid, topicId));
+
     } catch (error) {
       console.log("Error generating questions:", error.message);
     } finally {
@@ -123,11 +141,14 @@ function DeckPage() {
   //   }
   // };
 
+  //這裡應該是要開始attempt,所以是變更attempt
   const handleStartAttempt = async (deckId) => {
     try {
       const userId = user.uid;
-      const result = await dispatch(createUserAttempt(userId, deckId));
-      const newAttemptId = result.payload;
+      const result = await dispatch(createUserAttempt(userId, newAttemptId));
+
+      // const result = await dispatch(createUserAttempt(userId, deckId));
+      // const newAttemptId = result.payload;
       history.push({
         pathname: `/decks/${deckId}`,
         state: { attemptId: newAttemptId },
