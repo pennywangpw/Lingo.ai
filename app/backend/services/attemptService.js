@@ -67,9 +67,10 @@ const checkAttemptInDB = async (userId, attemptId) => {
 //Service to add user attempt; call this service after user starts a deck
 const AddUserAttemptToDB = async (attemptData, id) => {
     try {
+
         //attempt data = grab json data from frontend, its passed thru this and if it matches
         //with correct answer, add +1 to pass count for this attempt
-        console.log('attemptData: ', attemptData);
+        console.log('進到adduserattempttodb attemptData: ', attemptData);
         const userDocRef = doc(db, 'users', id);
         const userAttemptsRef = collection(userDocRef, 'attempts')
         const docRef = await addDoc(userAttemptsRef, attemptData);
@@ -81,6 +82,10 @@ const AddUserAttemptToDB = async (attemptData, id) => {
     }
 }
 
+
+//check if user selected answer is corret, if so, update attempt pass + attempt - > true
+//  also check if user passes 3 times that means the user passes the deck
+//if the user fails the question, attempt - > true
 const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
     console.log('userId: ', userId, 'attemptId: ', attemptId, 'id: ', id, 'answer: ', answer, 'deckId: ', deckId);
     try {
@@ -88,9 +93,12 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
             throw new Error('Attempt ID is required.');
         }
 
+        //get attempt doucment by attemptId
         const userDocRef = doc(db, 'users', userId);
         const attemptDocRef = doc(userDocRef, 'attempts', attemptId);
         const attemptDoc = await getDoc(attemptDocRef);
+
+        // get deck document by deckId
         const deckDocRef = doc(db, 'decks', deckId);
         const deckDoc = await getDoc(deckDocRef);
 
@@ -103,6 +111,7 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
         }
 
         const deckData = deckDoc.data();
+        console.log("後端拿到的deckData: ", deckData)
 
         // Ensure that cards and jsonData exist and are structured as expected
         if (!deckData.cards || !Array.isArray(deckData.cards) || !deckData.cards[0].questionData || !Array.isArray(deckData.cards[0].questionData.jsonData)) {
@@ -145,6 +154,8 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
             console.log('deck data', updatedAttemptData);
             if (isPassing) {
                 feedbackMessage = 'You passed this deck!';
+                //when the user passes the deck that also means the topics also pass, update topic pass
+                //also update user progress topicsPasses
                 await checkTopicProgression(deckData.userId, deckData.cards[0].questionData.topic_id, isPassing);
                 await archiveDeckInDB(deckId, deckData.userId);
             }

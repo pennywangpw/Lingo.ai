@@ -38,15 +38,26 @@ const loadFirstUserAttempt = (newAttemptId) => ({
 })
 
 // Thunk Actions
-export const fetchUserAttempt = (deckId) => async (dispatch) => {
+export const fetchUserAttempt = (userId) => async (dispatch) => {
   try {
-    const attempt = await getAttemptByDeckIdFromDB(deckId);
-    console.log("Fetched attempt:", attempt); // Log fetched data
-    dispatch(loadUserAttempt(attempt || {})); // Handle empty attempts
+    const response = await fetch(`/api/users/${userId}/attempts`)
+    const allAttempts = await response.json()
+    console.log("Fetched all attempts:", allAttempts); // Log fetched data
+    dispatch(loadUserAttempt(allAttempts || {})); // Handle empty attempts
   } catch (error) {
     console.error("Error fetching user attempt:", error);
   }
 };
+// //original user attempt
+// export const fetchUserAttempt = (deckId) => async (dispatch) => {
+//   try {
+//     const attempt = await getAttemptByDeckIdFromDB(deckId);
+//     console.log("Fetched attempt:", attempt); // Log fetched data
+//     dispatch(loadUserAttempt(attempt || {})); // Handle empty attempts
+//   } catch (error) {
+//     console.error("Error fetching user attempt:", error);
+//   }
+// };
 
 // Add User Attempt Thunk
 // export const startUserAttempt = (userId, deckId, passes = 0, totalQuestions = 3, createdAt = new Date().toISOString()) => async (dispatch) => {
@@ -67,6 +78,7 @@ export const fetchUserAttempt = (deckId) => async (dispatch) => {
 //initial user attempt
 
 export const InitialUserAttempt = (userId, deckId, passes, totalQuestions, createdAt) => async (dispatch) => {
+  console.log("傳進來的deckId應該是新generated question deckId: ", deckId)
   let payload = {
     deckId,
     passes,
@@ -143,7 +155,7 @@ export const createUserAttempt = (userId, attemptId) => async (dispatch) => {
 
 export const modifyUserAttempt = (userId, questionId, attemptId, answer, deckId) => async (dispatch) => {
   // let payload = {userId, questionId, attemptId, answer, deckId}
-  let payload = { deckId, questionId, answer }
+  let payload = { deckId, questionId, answer, attemptId }
 
   try {
     const response = await fetch(`/api/users/${userId}/attempts/${attemptId}/update`, {
@@ -178,15 +190,31 @@ const initialState = {
 // Reducer
 const userAttemptsReducer = (state = initialState, action) => {
   switch (action.type) {
-    case LOAD_USER_ATTEMPT:
-      return {
-        ...state,
-        attempts: state.attempts.map(attempt =>
-          attempt.deckId === action.attempt.deckId
-            ? { ...action.attempt }
-            : attempt
-        ),
-      };
+    case LOAD_USER_ATTEMPT: {
+      console.log("just for testing... ", action.attempt)
+      const newState = { ...state }
+      console.log("testing newState: ", newState)
+      newState.attempts = [...newState.attempts, ...action.attempt];
+
+      // action.attempt.forEach((attempt) => {
+      //   console.log("每一個attempt :", attempt)
+      //   console.log("newState ...", newState)
+      //   // newState["attempts"].push(attempt)
+
+      // }
+      // )
+      return newState;
+
+    }
+    // case LOAD_USER_ATTEMPT:
+    //   return {
+    //     ...state,
+    //     attempts: state.attempts.map(attempt =>
+    //       attempt.deckId === action.attempt.deckId
+    //         ? { ...action.attempt }
+    //         : attempt
+    //     ),
+    //   };
     case LOAD_FIRST_USER_ATTEMPT:
       return {
         ...state,

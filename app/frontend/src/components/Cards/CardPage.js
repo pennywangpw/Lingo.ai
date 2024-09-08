@@ -10,6 +10,7 @@ import {
   Grid,
   Card,
   Button,
+  getBottomNavigationUtilityClass,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
@@ -31,20 +32,36 @@ function CardPage() {
   const user = useSelector((state) => state.session.user);
   const deck = useSelector((state) => state.decks.selectedDeck);
   const cards = deck?.cards?.[0]?.questionData?.jsonData || [];
-  const attempt = useSelector((state) => state.attempts);
+  const attempts = useSelector((state) => state.attempts);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
   //const attemptId = useSelector((state) => state.userAttempts);
-  const { attemptId } = location.state || {};
+  const { attemptId, userId } = location.state || {};
   console.log("i don't think i can get this attemptid ", attemptId)
   const topicName = deck?.cards?.[0]?.questionData?.topic;
   const topicLevel = deck?.level;
+  console.log("這裡的deckid 視為和 : ", deckId)
+  console.log("這裡的attempt 視為和 : ", attempts)
+  let findAttemptRecord = null
+  let currentAttemptId = ""
 
-  console.log("cards", cards);
 
   useEffect(() => {
     dispatch(fetchOneDeck(deckId));
   }, [dispatch, deckId, attemptId]);
+
+  //因為attempt 資料裡面有紀載DeckId,而deckId又是獨一無二,拿到所有的attempt用deckId找出attempt紀錄
+  useEffect(() => {
+    dispatch(fetchUserAttempt(user.uid))
+  }, []);
+
+
+
+
+  //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
+  //if the attemptId can not be found, that means the deck hasn't been attempt yet
+  //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
+
 
   const handleAnswerChange = async (cardIndex, optionIndex, questionId) => {
     const selectedOption = cards[cardIndex].options[optionIndex];
@@ -55,34 +72,88 @@ function CardPage() {
         [cardIndex]: optionIndex,
       }));
 
-      const checkAttempt = await dispatch(
-        modifyUserAttempt(
-          user.uid,
-          questionId,
-          attemptId,
-          selectedOption,
-          deckId
-        )
-      );
-
-      console.log("checkAttempt: ", checkAttempt);
-
-      if (checkAttempt && checkAttempt.message === "Answer is correct!") {
-        setFeedback({ cardIndex, isCorrect: true });
-      } else if (
-        checkAttempt &&
-        checkAttempt.message === "Answer is incorrect."
-      ) {
-        setFeedback({
-          cardIndex,
-          isCorrect: false,
-          correctAnswer: checkAttempt.correctAnswer,
-        });
+      //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
+      if (attempts) {
+        findAttemptRecord = attempts.attempts.filter(
+          (attempt) => attempt.deckId === deckId
+        );
       }
+
+      console.log("trying this...", findAttemptRecord)
+      //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
+      if (findAttemptRecord) {
+        currentAttemptId = findAttemptRecord[0].id
+        const checkAttempt = await dispatch(
+          modifyUserAttempt(
+            user.uid,
+            questionId,
+            currentAttemptId,
+            // attemptId,
+            selectedOption,
+            deckId
+          )
+        );
+
+        console.log("checkAttempt: ", checkAttempt);
+
+        if (checkAttempt && checkAttempt.message === "Answer is correct!") {
+          setFeedback({ cardIndex, isCorrect: true });
+        } else if (
+          checkAttempt &&
+          checkAttempt.message === "Answer is incorrect."
+        ) {
+          setFeedback({
+            cardIndex,
+            isCorrect: false,
+            correctAnswer: checkAttempt.correctAnswer,
+          });
+        }
+
+      }
+
     } catch (error) {
       console.error("Error modifying user attempt:", error);
     }
   };
+
+  //original handleAnswerChange
+  // const handleAnswerChange = async (cardIndex, optionIndex, questionId) => {
+  //   const selectedOption = cards[cardIndex].options[optionIndex];
+  //   try {
+  //     // Update local state
+  //     setSelectedAnswers((prevAnswers) => ({
+  //       ...prevAnswers,
+  //       [cardIndex]: optionIndex,
+  //     }));
+
+  //     const checkAttempt = await dispatch(
+  //       modifyUserAttempt(
+  //         user.uid,
+  //         questionId,
+  //         attemptId,
+  //         selectedOption,
+  //         deckId
+  //       )
+  //     );
+
+  //     console.log("checkAttempt: ", checkAttempt);
+
+  //     if (checkAttempt && checkAttempt.message === "Answer is correct!") {
+  //       setFeedback({ cardIndex, isCorrect: true });
+  //     } else if (
+  //       checkAttempt &&
+  //       checkAttempt.message === "Answer is incorrect."
+  //     ) {
+  //       setFeedback({
+  //         cardIndex,
+  //         isCorrect: false,
+  //         correctAnswer: checkAttempt.correctAnswer,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error modifying user attempt:", error);
+  //   }
+  // };
 
   return (
     <>

@@ -59,6 +59,7 @@ const checkTopicProgression = async (uid, topicId, isPassing, currentLevel) => {
             if (topic.id === topicId) {
                 //topic.passes = isPassing ? 3 : topic.passes + 1;
                 topic.passes += 1;
+                //check if the user get all topics pass and update topic status
                 if (topic.passes >= 3) {
                     topic.status = true;
                 }

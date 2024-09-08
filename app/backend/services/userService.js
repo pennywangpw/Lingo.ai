@@ -204,7 +204,7 @@ const updateUserProgressFromDB = async (uid, topic_id) => {
                 ? parseFloat((topicsPassedCount / conceptData.topics.length).toFixed(1))
                 : 0.0;
 
-            // Update if any changes detected
+            // Update if any changes detected- check if topicsUpdated == true OR length of topic !== topicsPassed
             if (topicsUpdated || topicsPassedDecimal !== conceptData.topicsPassed) {
                 await updateDoc(conceptDoc.ref, {
                     topics: updatedTopics,

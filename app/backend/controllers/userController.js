@@ -67,6 +67,8 @@ const getUserProgress = async (req, res) => {
   }
 };
 
+//check if topic status and how many "pass" the user gets from topic: update TopicPasses
+
 const updateUserProgress = async (req, res) => {
   const { id } = req.params;
   // console.log("update user progress route is hit", id);
@@ -124,7 +126,7 @@ const checkUserAttempt = async (req, res) => {
   }
 };
 
-// Start new user attempt
+// Start new user attempt: deckId, passes, totalQuestions, createdAt
 const addUserAttempt = async (req, res) => {
   const { id } = req.params;
   const {
@@ -145,9 +147,14 @@ const addUserAttempt = async (req, res) => {
   }
 };
 
+//update user attempt with data: userId, id, attemptId, answer, deckId
+//check if user selected answer is corret, if so, update attempt pass + attempt - > true
+//  also check if user passes 3 times that means the user passes the deck (need to update topic pass and updatae topic status if all topics are passed)
+//if the user fails the question, attempt - > true
 const updateUserAttempt = async (req, res) => {
-  const { userId, attemptId } = req.params;
-  const { deckId, id, answer } = req.body;
+  // const { userId, attemptId } = req.params;
+  const { userId } = req.params;  //
+  const { deckId, id, answer, attemptId } = req.body;
   console.log(
     "userId: ",
     userId,

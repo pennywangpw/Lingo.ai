@@ -29,22 +29,35 @@ function DeckPage() {
   const history = useHistory();
   const { conceptId, topicId } = useParams();
   const [loading, setLoading] = useState(false);
+  const [deckId, setDeckId] = useState("")
   const theme = useTheme();
-  let deckId;
 
   //get currentUser
   const user = useSelector((state) => state.session.user)
   const userId = user.uid;
   const { decks } = useSelector((state) => state.decks);
+  console.log("所有的decks ", decks, userId, topicId)
 
 
   //get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
+  //同一個topic下有很多個decks
   const decksFilter = decks?.filter((deck) => userId == deck.userId && topicId === deck.topic_id);
   console.log("decksFilter 需要deck id: ", decksFilter)
-  if (decksFilter.length !== 0) {
-    deckId = decksFilter[0].id
+  // Sort the decks by createdAt in descending order (latest deck first)
+  const sortedDecks = decksFilter?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  }
+  // Get the latest deck (first item in the sorted array)
+  const latestDeck = sortedDecks?.[0];
+
+  console.log("Latest deck:", latestDeck);
+
+  // if (latestDeck) {
+  //   setDeckId(latestDeck.id)
+  // }
+  // if (decksFilter.length !== 0) {
+  //   deckId = decksFilter[0].id
+
+  // }
 
   //get CurrentUser progress to get current concept
   const progressState = useSelector((state) => state.users.progress);
@@ -80,7 +93,6 @@ function DeckPage() {
     }
   }, [newQuestionId, dispatch, user.uid, topicId]);
 
-
   //initial
   let passes = 0
   let totalQuestions = 3
@@ -100,16 +112,19 @@ function DeckPage() {
           userId
         )
       );
-      // initial attempt
-      newAttemptId = await dispatch(
-        InitialUserAttempt(
-          userId,
-          deckId,
-          passes,
-          totalQuestions,
-          createdAt
-        )
-      )
+
+      // console.log("新增厚的deck.id ", latestDeck.id)
+      // // initial attempt
+      // newAttemptId = await dispatch(
+      //   InitialUserAttempt(
+      //     userId,
+      //     latestDeck.id,
+      //     passes,
+      //     totalQuestions,
+      //     createdAt
+      //   )
+      // )
+      // console.log("測試看看newAttemptId: ", newAttemptId)
 
 
     } catch (error) {
@@ -141,23 +156,55 @@ function DeckPage() {
   //   }
   // };
 
-  //這裡應該是要開始attempt,所以是變更attempt
-  const handleStartAttempt = async (deckId) => {
+  //這裡應該是要開始attempt,所以是變更attempt,但會在interact with card時變更attempt
+  //initial attempt 在這裡
+  const handleRedirectToCards = async (deckId) => {
+    console.log("應該要進到這裡啊??")
     try {
-      const userId = user.uid;
-      const result = await dispatch(createUserAttempt(userId, newAttemptId));
+      //應該是一按下去deck,就要先判斷是否有attempt紀錄?
+      //沒有紀錄,建一個新
+      //有紀錄,找到attemptId 在修改
+      // initial attempt
+      newAttemptId = await dispatch(
+        InitialUserAttempt(
+          userId,
+          latestDeck.id,
+          passes,
+          totalQuestions,
+          createdAt
+        )
+      )
+      console.log("測試看看newAttemptId: ", newAttemptId)
 
-      // const result = await dispatch(createUserAttempt(userId, deckId));
-      // const newAttemptId = result.payload;
+      // const userId = user.uid;
+
       history.push({
         pathname: `/decks/${deckId}`,
-        state: { attemptId: newAttemptId },
+        state: { userId: userId },
+
+        // state: { attemptId: newAttemptId, userId: userId },
       });
-      console.log("Attempt started successfully:", newAttemptId);
+      console.log("Redirect......", newAttemptId);
     } catch (error) {
       console.error("Error starting attempt:", error);
     }
   };
+  // const handleStartAttempt = async (deckId) => {
+  //   try {
+  //     const userId = user.uid;
+  //     // const result = await dispatch(createUserAttempt(userId, newAttemptId));
+
+  //     // const result = await dispatch(createUserAttempt(userId, deckId));
+  //     // const newAttemptId = result.payload;
+  //     history.push({
+  //       pathname: `/decks/${deckId}`,
+  //       state: { attemptId: newAttemptId, userId: userId },
+  //     });
+  //     console.log("Attempt started successfully:", newAttemptId);
+  //   } catch (error) {
+  //     console.error("Error starting attempt:", error);
+  //   }
+  // };
 
   const handleResumeAttempt = (deckId, attemptId) => {
     history.push({
@@ -247,7 +294,9 @@ function DeckPage() {
                             border: `1.5px solid ${theme.palette.mode === "light" ? "#160e0e" : "#f1e9e9"
                               }`,
                           }}
-                          onClick={() => handleStartAttempt(deck.id)}
+                          // onClick={() => handleStartAttempt(deck.id)}
+                          onClick={() => handleRedirectToCards(deck.id)}
+
                         >
                           <h3>{`Deck #${deck.deck_name}
                             `}</h3>

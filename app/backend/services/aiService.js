@@ -47,8 +47,8 @@ const addQuestionsToDB = async (userId, { questionData }) => {
         }
         await setDoc(newDocRef, newQuestions);
 
-
-        return newQuestions;
+        return newDocRef.id
+        // return newQuestions;
     } catch (error) {
         throw new Error('Error adding questions to DB: ' + error.message);
     }

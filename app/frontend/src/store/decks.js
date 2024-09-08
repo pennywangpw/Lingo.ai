@@ -66,6 +66,7 @@ export const createDeck = (userId, aiGeneratedRequestId) => async (dispatch) => 
       // const alldecks = await response.json()
 
       // dispatch(loadDecks(alldecks.decks));
+      return newdeck
     }
   } catch (error) {
     console.error("Error fetching decks:", error);
