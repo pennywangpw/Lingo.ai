@@ -16,7 +16,7 @@ const { doc, getDoc } = require('firebase/firestore');
 
 // get question from AI and store in db
 const addCardQuestions = async (req, res) => {
-    console.log("am i hitting get ai questions route: ", req.body)
+    // console.log("am i hitting get ai questions route: ", req.body)
     const { concept_name, topic_id, user_native_language, user_level, userId } = req.body
 
 
@@ -31,7 +31,7 @@ const addCardQuestions = async (req, res) => {
 
     const topicData = topicDoc.data();
     const topic_name = topicData.topic_name
-    console.log("topicData: ", topicData);
+    // console.log("topicData: ", topicData);
 
     if (!topicData.concept_id) {
         throw new Error("Invalid topic due to concept_id is empty!!")
@@ -40,12 +40,12 @@ const addCardQuestions = async (req, res) => {
     try {
 
         let questionData = await generateQuestionsByAI(concept_name, topic_name, user_native_language, user_level, topic_id);
-        console.log("questionData: ", questionData)
+        // console.log("questionData: ", questionData)
 
         if (questionData) {
             const newQuestionsId = await addQuestionsToDB(userId, { questionData });
 
-            console.log("newQuestionsId: ", newQuestionsId)
+            // console.log("newQuestionsId: ", newQuestionsId)
             res.status(201).json(newQuestionsId);
 
             // res.status(201).json({ message: `questions generated from ai added to db successfully!`, newQuestionsId });

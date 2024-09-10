@@ -153,20 +153,10 @@ const addUserAttempt = async (req, res) => {
 //if the user fails the question, attempt - > true
 const updateUserAttempt = async (req, res) => {
   // const { userId, attemptId } = req.params;
+  console.log("有盡到update user attempt api...")
   const { userId } = req.params;  //
   const { deckId, id, answer, attemptId } = req.body;
-  console.log(
-    "userId: ",
-    userId,
-    "attemptId: ",
-    attemptId,
-    "deckId: ",
-    deckId,
-    "id: ",
-    id, //index of the answer they selected
-    "answer: ",
-    answer
-  );
+  console.log("-------userId: ", userId, "attemptId: ", attemptId, "deckId: ", deckId, "id: ", id, "answer: ", answer);
   try {
     const checkAttempt = await checkAnswerInDB(
       userId,

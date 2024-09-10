@@ -15,9 +15,9 @@ export const UPDATE_USER_ATTEMPT = "userAttempts/UPDATE_USER_ATTEMPT";
 export const LOAD_FIRST_USER_ATTEMPT = "userAttempts/LOAD_FIRST_USER_ATTEMPT";
 
 // Action Creators
-const loadUserAttempt = (attempt) => ({
+const loadUserAttempt = (allAttempts) => ({
   type: LOAD_USER_ATTEMPT,
-  attempt,
+  allAttempts,
 });
 
 // Add User Attempt
@@ -156,14 +156,19 @@ export const createUserAttempt = (userId, attemptId) => async (dispatch) => {
 export const modifyUserAttempt = (userId, questionId, attemptId, answer, deckId) => async (dispatch) => {
   // let payload = {userId, questionId, attemptId, answer, deckId}
   let payload = { deckId, questionId, answer, attemptId }
-
+  console.log("是我的payload有傳錯嗎? ", payload)
   try {
     const response = await fetch(`/api/users/${userId}/attempts/${attemptId}/update`, {
-      method: 'POST',
+      method: 'PUT',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     })
-    console.log("modifyUserAttempt : ", response)
+    if (response.ok) {
+      const updatedUserAttempt = await response.json()
+      console.log("modifyUserAttempt : ", updatedUserAttempt)
+      // dispatch(updateUserAttempt(attemptId, response));
+
+    }
     // dispatch(updateUserAttempt(attemptId, response));
     // return checkAttempt;
   } catch (error) {
@@ -191,10 +196,19 @@ const initialState = {
 const userAttemptsReducer = (state = initialState, action) => {
   switch (action.type) {
     case LOAD_USER_ATTEMPT: {
-      console.log("just for testing... ", action.attempt)
+      console.log("just for testing... ", action.allAttempts)
       const newState = { ...state }
       console.log("testing newState: ", newState)
-      newState.attempts = [...newState.attempts, ...action.attempt];
+
+      // Initialize newState.attempts as an array if it's not already
+      if (!Array.isArray(newState.attempts)) {
+        newState.attempts = [];
+      }
+
+      // Append action.allAttempts to the existing newState.attempts
+      newState.attempts = [...newState.attempts, ...action.allAttempts];
+
+      console.log("Updated newState: ", newState);
 
       // action.attempt.forEach((attempt) => {
       //   console.log("每一個attempt :", attempt)

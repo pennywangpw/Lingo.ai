@@ -44,20 +44,20 @@ const createDeck = async (req, res) => {
             return res.status(404).json({ message: 'AI Generated Request not found' });
         }
 
-        console.log('AI Generated Request document fetched successfully');
+        // console.log('AI Generated Request document fetched successfully');
         const topic_id = aiGeneratedRequestDoc.data().questionData.topic_id;
 
         // Create the deck in the database
-        console.log('Creating deck in database...');
+        // console.log('Creating deck in database...');
         const deckInfo = await createDeckInDB({ userId, topic_id, createdAt, archived });
         const deckId = deckInfo.id;
 
-        console.log('Deck created with ID:', deckId);
+        // console.log('Deck created with ID:', deckId);
         // Add cards to the deck using the aiGeneratedRequestId
-        console.log('Adding cards to the deck...');
+        // console.log('Adding cards to the deck...');
         const deckQuestions = await addCardsToDeckInDB(deckId, userId, aiGeneratedRequestId);
 
-        console.log('Cards added to the deck successfully');
+        // console.log('Cards added to the deck successfully');
         res.status(201).json({ message: 'Deck created', deckInfo, deckQuestions });
     } catch (error) {
         console.error('Error occurred during deck creation:', error);

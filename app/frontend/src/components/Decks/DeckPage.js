@@ -14,12 +14,15 @@ import {
 import { addQuestions } from "../../store/questions";
 import { fetchOneTopic } from "../../store/topics";
 import { NavLink, useHistory } from "react-router-dom";
-import { createUserAttempt, InitialUserAttempt } from "../../store/attempt";
+import { createUserAttempt, InitialUserAttempt, fetchUserAttempt } from "../../store/attempt";
 import { fetchUserConcepts } from "../../store/concepts";
 import { fetchUserProgress } from '../../store/users';
 import { createDeck } from '../../store/decks';
 
 import { useTheme } from "@mui/material/styles";
+let findAttemptRecord = null
+let currentAttemptId = ""
+let decksFilter = null
 
 function DeckPage() {
   //1.get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
@@ -35,13 +38,16 @@ function DeckPage() {
   //get currentUser
   const user = useSelector((state) => state.session.user)
   const userId = user.uid;
+
+  //get all decks from store
+  //get all attempts from store
   const { decks } = useSelector((state) => state.decks);
-  console.log("所有的decks ", decks, userId, topicId)
+  const attempts = useSelector((state) => state.attempts);
 
 
   //get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
   //同一個topic下有很多個decks
-  const decksFilter = decks?.filter((deck) => userId == deck.userId && topicId === deck.topic_id);
+  decksFilter = decks?.filter((deck) => userId == deck.userId && topicId === deck.topic_id);
   console.log("decksFilter 需要deck id: ", decksFilter)
   // Sort the decks by createdAt in descending order (latest deck first)
   const sortedDecks = decksFilter?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -51,13 +57,6 @@ function DeckPage() {
 
   console.log("Latest deck:", latestDeck);
 
-  // if (latestDeck) {
-  //   setDeckId(latestDeck.id)
-  // }
-  // if (decksFilter.length !== 0) {
-  //   deckId = decksFilter[0].id
-
-  // }
 
   //get CurrentUser progress to get current concept
   const progressState = useSelector((state) => state.users.progress);
@@ -93,11 +92,18 @@ function DeckPage() {
     }
   }, [newQuestionId, dispatch, user.uid, topicId]);
 
+
+  //因為attempt 資料裡面有紀載DeckId,而deckId又是獨一無二,拿到所有的attempt用deckId找出attempt紀錄
+  useEffect(() => {
+    dispatch(fetchUserAttempt(user.uid))
+  }, []);
+
   //initial
   let passes = 0
   let totalQuestions = 3
   let createdAt = ""
   let newAttemptId = ""
+
 
   const handleGenerateQuestions = async (e) => {
     e.preventDefault();
@@ -113,18 +119,8 @@ function DeckPage() {
         )
       );
 
-      // console.log("新增厚的deck.id ", latestDeck.id)
-      // // initial attempt
-      // newAttemptId = await dispatch(
-      //   InitialUserAttempt(
-      //     userId,
-      //     latestDeck.id,
-      //     passes,
-      //     totalQuestions,
-      //     createdAt
-      //   )
-      // )
-      // console.log("測試看看newAttemptId: ", newAttemptId)
+
+
 
 
     } catch (error) {
@@ -159,12 +155,7 @@ function DeckPage() {
   //這裡應該是要開始attempt,所以是變更attempt,但會在interact with card時變更attempt
   //initial attempt 在這裡
   const handleRedirectToCards = async (deckId) => {
-    console.log("應該要進到這裡啊??")
     try {
-      //應該是一按下去deck,就要先判斷是否有attempt紀錄?
-      //沒有紀錄,建一個新
-      //有紀錄,找到attemptId 在修改
-      // initial attempt
       newAttemptId = await dispatch(
         InitialUserAttempt(
           userId,
@@ -173,21 +164,26 @@ function DeckPage() {
           totalQuestions,
           createdAt
         )
-      )
+      );
       console.log("測試看看newAttemptId: ", newAttemptId)
 
-      // const userId = user.uid;
+      try {
 
-      history.push({
-        pathname: `/decks/${deckId}`,
-        state: { userId: userId },
+        history.push({
+          pathname: `/decks/${deckId}`,
+          state: { userId: userId },
 
-        // state: { attemptId: newAttemptId, userId: userId },
-      });
-      console.log("Redirect......", newAttemptId);
+          // state: { attemptId: newAttemptId, userId: userId },
+        });
+        console.log("Redirect......", newAttemptId);
+      } catch (error) {
+        console.error("Error starting attempt:", error);
+      }
     } catch (error) {
-      console.error("Error starting attempt:", error);
+      console.error("Error in InitialUserAttempt:", error.message);
     }
+
+
   };
   // const handleStartAttempt = async (deckId) => {
   //   try {

@@ -32,14 +32,15 @@ function CardPage() {
   const user = useSelector((state) => state.session.user);
   const deck = useSelector((state) => state.decks.selectedDeck);
   const cards = deck?.cards?.[0]?.questionData?.jsonData || [];
-  const attempts = useSelector((state) => state.attempts);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
   //const attemptId = useSelector((state) => state.userAttempts);
   const { attemptId, userId } = location.state || {};
-  console.log("i don't think i can get this attemptid ", attemptId)
   const topicName = deck?.cards?.[0]?.questionData?.topic;
   const topicLevel = deck?.level;
+
+
+  const attempts = useSelector((state) => state.attempts);
   console.log("這裡的deckid 視為和 : ", deckId)
   console.log("這裡的attempt 視為和 : ", attempts)
   let findAttemptRecord = null
@@ -72,8 +73,13 @@ function CardPage() {
         [cardIndex]: optionIndex,
       }));
 
+      //應該是一按下去deck,就要先判斷是否有attempt紀錄?
+      //沒有紀錄,建一個新
+      //有紀錄,找到attemptId 在修改
+      // initial attempt
       //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
       if (attempts) {
+        console.log("拿到Store裡面的attempts: ", attempts)
         findAttemptRecord = attempts.attempts.filter(
           (attempt) => attempt.deckId === deckId
         );
@@ -81,7 +87,8 @@ function CardPage() {
 
       console.log("trying this...", findAttemptRecord)
       //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
-      if (findAttemptRecord) {
+      if (findAttemptRecord.length > 0) {
+        console.log("找到attempt紀錄: ", findAttemptRecord)
         currentAttemptId = findAttemptRecord[0].id
         const checkAttempt = await dispatch(
           modifyUserAttempt(
