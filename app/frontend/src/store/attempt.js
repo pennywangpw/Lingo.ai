@@ -153,6 +153,7 @@ export const createUserAttempt = (userId, attemptId) => async (dispatch) => {
 
 
 
+
 export const modifyUserAttempt = (userId, questionId, attemptId, answer, deckId) => async (dispatch) => {
   // let payload = {userId, questionId, attemptId, answer, deckId}
   let payload = { deckId, questionId, answer, attemptId }
@@ -165,12 +166,12 @@ export const modifyUserAttempt = (userId, questionId, attemptId, answer, deckId)
     })
     if (response.ok) {
       const updatedUserAttempt = await response.json()
-      console.log("modifyUserAttempt : ", updatedUserAttempt)
+      console.log("modifyUserAttempt.checkAttempt : ", updatedUserAttempt.checkAttempt)
+      dispatch(updateUserAttempt(attemptId, updatedUserAttempt.checkAttempt));
       // dispatch(updateUserAttempt(attemptId, response));
+      return updatedUserAttempt.checkAttempt;
 
     }
-    // dispatch(updateUserAttempt(attemptId, response));
-    // return checkAttempt;
   } catch (error) {
     console.error("Error updating user attempt:", error);
   }

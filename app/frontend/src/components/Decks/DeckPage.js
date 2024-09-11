@@ -153,19 +153,35 @@ function DeckPage() {
   // };
 
   //這裡應該是要開始attempt,所以是變更attempt,但會在interact with card時變更attempt
-  //initial attempt 在這裡
+  //initial attempt OR try to find attempt record
+  //redirect to card page
   const handleRedirectToCards = async (deckId) => {
     try {
-      newAttemptId = await dispatch(
-        InitialUserAttempt(
-          userId,
-          latestDeck.id,
-          passes,
-          totalQuestions,
-          createdAt
-        )
-      );
-      console.log("測試看看newAttemptId: ", newAttemptId)
+      //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
+      if (attempts) {
+        console.log("拿到Store裡面的attempts: ", attempts)
+        findAttemptRecord = attempts.attempts.filter(
+          (attempt) => attempt.deckId === deckId
+        );
+      }
+      console.log("在redirect前先進到這 findAttemptRecord: ", findAttemptRecord)
+
+      //if CAN NOT find the attempt record
+      if (findAttemptRecord.length === 0) {
+        console.log("在redirect前先進到這")
+        newAttemptId = await dispatch(
+          InitialUserAttempt(
+            userId,
+            latestDeck.id,
+            passes,
+            totalQuestions,
+            createdAt
+          )
+        );
+        console.log("測試看看newAttemptId: ", newAttemptId)
+
+      }
+
 
       try {
 
@@ -176,6 +192,7 @@ function DeckPage() {
           // state: { attemptId: newAttemptId, userId: userId },
         });
         console.log("Redirect......", newAttemptId);
+
       } catch (error) {
         console.error("Error starting attempt:", error);
       }

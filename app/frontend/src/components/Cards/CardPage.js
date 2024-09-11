@@ -60,11 +60,12 @@ function CardPage() {
 
 
   //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
-  //if the attemptId can not be found, that means the deck hasn't been attempt yet
+  //if the attemptId can not be found, that means the deck hasn't been attempt yet (should not be this as we initial attempt before redirecting to card page)
   //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
 
 
   const handleAnswerChange = async (cardIndex, optionIndex, questionId) => {
+    console.log("user trying to answer the question.....")
     const selectedOption = cards[cardIndex].options[optionIndex];
     try {
       // Update local state
@@ -73,11 +74,6 @@ function CardPage() {
         [cardIndex]: optionIndex,
       }));
 
-      //應該是一按下去deck,就要先判斷是否有attempt紀錄?
-      //沒有紀錄,建一個新
-      //有紀錄,找到attemptId 在修改
-      // initial attempt
-      //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
       if (attempts) {
         console.log("拿到Store裡面的attempts: ", attempts)
         findAttemptRecord = attempts.attempts.filter(

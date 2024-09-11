@@ -163,6 +163,7 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
             // return { message: 'Answer is correct!' };
             feedbackMessage = 'Answer is correct!';
         } else {
+            console.log("user答錯了 ", deckData.cards[0])
             deckData.cards[0].questionData.jsonData[questionIndex].isAttempted = true;
             await updateDoc(deckDocRef, {
                 cards: deckData.cards,  // Update the entire cards array
