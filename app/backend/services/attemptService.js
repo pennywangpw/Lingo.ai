@@ -133,6 +133,8 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
 
         let feedbackMessage;
 
+        //對答案,變更pass
+        //確認是否已經有3個pass
         if (answer === correctAnswer) {
             // Mark the question as attempted
             deckData.cards[0].questionData.jsonData[questionIndex].isAttempted = true;
@@ -158,10 +160,13 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
                 //also update user progress topicsPasses
                 await checkTopicProgression(deckData.userId, deckData.cards[0].questionData.topic_id, isPassing);
                 await archiveDeckInDB(deckId, deckData.userId);
+            } else {
+
+                // return { message: 'Answer is correct!' };
+                feedbackMessage = 'Answer is correct!';
             }
 
-            // return { message: 'Answer is correct!' };
-            feedbackMessage = 'Answer is correct!';
+            return { message: feedbackMessage, correctAnswer, updatedAttemptData };
         } else {
             console.log("user答錯了 ", deckData.cards[0])
             deckData.cards[0].questionData.jsonData[questionIndex].isAttempted = true;
@@ -170,9 +175,10 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
             });
             // return { message: 'Answer is incorrect.', correctAnswer };
             feedbackMessage = 'Answer is incorrect.';
+            return { message: feedbackMessage, correctAnswer };
         }
-
-        return { message: feedbackMessage, correctAnswer };
+        //問題:db有變更pass數量,但是store沒有變更
+        // return { message: feedbackMessage, correctAnswer };
     } catch (error) {
         throw new Error('Error checking answer: ' + error.message);
     }

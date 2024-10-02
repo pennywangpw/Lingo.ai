@@ -25,9 +25,9 @@ let currentAttemptId = ""
 let decksFilter = null
 
 function DeckPage() {
-  //1.get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
-  //2.get user progress in order to get concept_level
-  //3.get user in order to get language
+  //1.get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id) for displaying all decks
+  //2.get user progress in order to get concept_level for generating new deck purpose
+  //3.get user in order to get language for generating new deck purpose
   const dispatch = useDispatch();
   const history = useHistory();
   const { conceptId, topicId } = useParams();
@@ -48,7 +48,6 @@ function DeckPage() {
   //get all decks under the current user and current topic (get all decks then filter decks.topic_id == topic_id)
   //同一個topic下有很多個decks
   decksFilter = decks?.filter((deck) => userId == deck.userId && topicId === deck.topic_id);
-  console.log("decksFilter 需要deck id: ", decksFilter)
   // Sort the decks by createdAt in descending order (latest deck first)
   const sortedDecks = decksFilter?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -69,7 +68,6 @@ function DeckPage() {
 
   //get new generated questions id
   const newQuestionId = useSelector((state) => state.questions.questionId)
-  console.log("我拿出來的question : ", newQuestionId)
 
 
   useEffect(() => {
@@ -85,7 +83,6 @@ function DeckPage() {
   // Use useEffect to monitor changes in newQuestionId, create a new deck once newQuestionId is generated
   useEffect(() => {
     if (newQuestionId) {
-      console.log("是否有進入這個條件~");
       dispatch(createDeck(user.uid, newQuestionId)).then(() => {
         dispatch(fetchDecks(user.uid, topicId));
       });
@@ -158,17 +155,15 @@ function DeckPage() {
   const handleRedirectToCards = async (deckId) => {
     try {
       //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
+      //因為我有default casen所以一定會有return,但是要檢查return回來的東西是否有內容
       if (attempts) {
-        console.log("拿到Store裡面的attempts: ", attempts)
         findAttemptRecord = attempts.attempts.filter(
           (attempt) => attempt.deckId === deckId
         );
       }
-      console.log("在redirect前先進到這 findAttemptRecord: ", findAttemptRecord)
 
       //if CAN NOT find the attempt record
       if (findAttemptRecord.length === 0) {
-        console.log("在redirect前先進到這")
         newAttemptId = await dispatch(
           InitialUserAttempt(
             userId,
@@ -178,7 +173,6 @@ function DeckPage() {
             createdAt
           )
         );
-        console.log("測試看看newAttemptId: ", newAttemptId)
 
       }
 
@@ -388,8 +382,8 @@ function DeckPage() {
                           }}
                         >
                           <Typography variant="h6">{`Deck #${deck.deck_name}`}</Typography>
-                          <h3>{`Deck #${deck.deck_name
-                            }`}</h3>
+                          {/* <h3>{`Deck #${deck.deck_name
+                            }`}</h3> */}
                           {/* Update with your deck field */}
                         </Button>
                       </Grid>

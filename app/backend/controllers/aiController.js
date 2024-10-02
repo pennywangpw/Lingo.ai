@@ -40,7 +40,7 @@ const addCardQuestions = async (req, res) => {
     try {
 
         let questionData = await generateQuestionsByAI(concept_name, topic_name, user_native_language, user_level, topic_id);
-        // console.log("questionData: ", questionData)
+        console.log("questionData: ", questionData)
 
         if (questionData) {
             const newQuestionsId = await addQuestionsToDB(userId, { questionData });

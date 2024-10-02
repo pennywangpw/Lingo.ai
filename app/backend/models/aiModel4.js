@@ -278,7 +278,6 @@ async function generateQuestionsByAI(concept_name, topic, native_language, level
         return error
     }
 
-
     try {
 
         const result = await model.generateContent(prompt);

@@ -31,7 +31,7 @@ function CardPage() {
   const location = useLocation();
   const user = useSelector((state) => state.session.user);
   const deck = useSelector((state) => state.decks.selectedDeck);
-  const cards = deck?.cards?.[0]?.questionData?.jsonData || [];
+  const cards = deck?.deck?.cards?.[0]?.questionData?.jsonData || [];
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
   //const attemptId = useSelector((state) => state.userAttempts);
@@ -43,6 +43,7 @@ function CardPage() {
   const attempts = useSelector((state) => state.attempts);
   console.log("這裡的deckid 視為和 : ", deckId)
   console.log("這裡的attempt 視為和 : ", attempts)
+
   let findAttemptRecord = null
   let currentAttemptId = ""
 
@@ -98,8 +99,11 @@ function CardPage() {
         );
 
         console.log("checkAttempt: ", checkAttempt);
+        if (checkAttempt && checkAttempt.message === "You passed this deck!") {
+          setFeedback({ cardIndex, isCorrect: true });
+        }
 
-        if (checkAttempt && checkAttempt.message === "Answer is correct!") {
+        else if (checkAttempt && checkAttempt.message === "Answer is correct!") {
           setFeedback({ cardIndex, isCorrect: true });
         } else if (
           checkAttempt &&
@@ -172,8 +176,10 @@ function CardPage() {
       >
         <Grid container spacing={2}>
           {cards.map((card, cardIndex) => (
+
             <React.Fragment key={card.id}>
               {/* QUESTION CARD */}
+              {console.log("所有的card", card)}
               <Grid item xs={12} md={4}>
                 <Card
                   sx={{

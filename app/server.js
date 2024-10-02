@@ -11,7 +11,7 @@ const aiRoutes = require('./frontend/src/routes/aiRoutes');
 const deckRoutes = require('./frontend/src/routes/deckRoutes');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5007;
 
 app.use(bodyParser.json());
 

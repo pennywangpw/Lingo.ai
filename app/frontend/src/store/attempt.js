@@ -241,6 +241,7 @@ const userAttemptsReducer = (state = initialState, action) => {
         attempts: [...state.attempts, action.newAttempt],
       };
     case UPDATE_USER_ATTEMPT:
+      console.log("----attempt傳回來", state.attempts, action)
       return {
         ...state,
         attempts: state.attempts.map((attempt) =>
