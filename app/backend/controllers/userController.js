@@ -135,7 +135,7 @@ const addUserAttempt = async (req, res) => {
     totalQuestions = 3,
     createdAt = new Date().toISOString(),
   } = req.body;
-  console.log("id: ", id);
+  console.log("addUserAttempt id: ", id, deckId);
   try {
     const attemptData = { deckId, passes, totalQuestions, createdAt };
     const newAttemptId = await AddUserAttemptToDB(attemptData, id);
@@ -155,15 +155,16 @@ const updateUserAttempt = async (req, res) => {
   // const { userId, attemptId } = req.params;
   console.log("有盡到update user attempt api...")
   const { userId } = req.params;  //
-  const { deckId, questionId, answer, attemptId } = req.body;
-  console.log("-------userId: ", userId, "attemptId: ", attemptId, "deckId: ", deckId, "questionId: ", questionId, "answer: ", answer);
+  const { deckId, questionId, answer, attemptId, needResetPasses } = req.body;
+  console.log("-------userId: ", userId, "attemptId: ", attemptId, "deckId: ", deckId, "questionId: ", questionId, "answer: ", answer, "needResetPasses: ", needResetPasses);
   try {
     const checkAttempt = await checkAnswerInDB(
       userId,
       questionId,
       attemptId,
       answer,
-      deckId
+      deckId,
+      needResetPasses
     );
     res.status(200).json({ message: "User attempt updated", questionId, checkAttempt });
   } catch (error) {

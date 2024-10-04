@@ -40,12 +40,60 @@ function CardPage() {
   const topicLevel = deck?.level;
 
 
-  const attempts = useSelector((state) => state.attempts);
-  console.log("這裡的deckid 視為和 : ", deckId)
-  console.log("這裡的attempt 視為和 : ", attempts)
-
   let findAttemptRecord = null
   let currentAttemptId = ""
+  let needResetPasses = false
+
+  const attempts = useSelector((state) => state.attempts);
+  console.log("這裡的deck 視為和 : ", deck)
+  console.log("這裡的attempt 視為和 : ", attempts)
+
+  if (attempts.attempts.length > 1) {
+
+    findAttemptRecord = attempts.attempts.filter(
+      (attempt) => attempt.deckId === deckId
+    );
+  }
+  else {
+    findAttemptRecord = attempts.attempts.newAttemptId
+  }
+
+  console.log("trying this...", findAttemptRecord)
+
+  //檢查如果card.isAttempt = true 並且不等於 deck.passes,我就reset card.isAttempt 和attempt.pass再讓user挑戰一次
+  console.log("所有的卡片: ", cards)
+  console.log("deck的內容: ", deck)
+  let cardAttemptCnt = 0
+
+  for (let card of cards) {
+    if (card.isAttempted) {
+      cardAttemptCnt++
+    }
+  }
+
+  console.log("cardAttemptCnt: ", cardAttemptCnt)
+
+  if (cardAttemptCnt !== findAttemptRecord[0].passes) {
+    //reset passes in attempts
+    console.log("user touch的卡片不等於pass數量",)
+
+    // currentAttemptId = findAttemptRecord?.[0].id
+    // needResetPasses = true
+    // dispatch(
+    //   modifyUserAttempt(
+    //     user.uid,
+    //     questionId,
+    //     currentAttemptId,
+    //     selectedOption,
+    //     deckId,
+    //     needResetPasses
+    //   )
+    // );
+  }
+
+
+
+
 
 
   useEffect(() => {
@@ -64,10 +112,24 @@ function CardPage() {
   //if the attemptId can not be found, that means the deck hasn't been attempt yet (should not be this as we initial attempt before redirecting to card page)
   //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
 
-
   const handleAnswerChange = async (cardIndex, optionIndex, questionId) => {
-    console.log("user trying to answer the question.....")
+    //check if card has been attempted, if so, pop out an alert to let user knows it's attempted
+    console.log("cards[cardIndex]: ", cards[cardIndex])
     const selectedOption = cards[cardIndex].options[optionIndex];
+
+    findAttemptRecord = attempts.attempts.filter(
+      (attempt) => attempt.deckId === deckId
+    );
+
+    console.log("trying this...", findAttemptRecord)
+    //if the card has been attempted and user tries to replay it reset card.passes
+    if (cards[cardIndex].isAttempted) {
+      console.log("是否有盡到~")
+
+      alert(`You've attemmpted this card. correct answer is: ${cards[cardIndex].answer}`)
+    }
+
+    // const selectedOption = cards[cardIndex].options[optionIndex];
     try {
       // Update local state
       setSelectedAnswers((prevAnswers) => ({
@@ -82,7 +144,7 @@ function CardPage() {
         );
       }
 
-      console.log("trying this...", findAttemptRecord)
+      // console.log("trying this...", findAttemptRecord)
       //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
       if (findAttemptRecord.length > 0) {
         console.log("找到attempt紀錄: ", findAttemptRecord)
@@ -94,7 +156,8 @@ function CardPage() {
             currentAttemptId,
             // attemptId,
             selectedOption,
-            deckId
+            deckId,
+            needResetPasses
           )
         );
 
@@ -122,9 +185,8 @@ function CardPage() {
       console.error("Error modifying user attempt:", error);
     }
   };
-
-  //original handleAnswerChange
   // const handleAnswerChange = async (cardIndex, optionIndex, questionId) => {
+  //   console.log("user trying to answer the question.....")
   //   const selectedOption = cards[cardIndex].options[optionIndex];
   //   try {
   //     // Update local state
@@ -133,34 +195,55 @@ function CardPage() {
   //       [cardIndex]: optionIndex,
   //     }));
 
-  //     const checkAttempt = await dispatch(
-  //       modifyUserAttempt(
-  //         user.uid,
-  //         questionId,
-  //         attemptId,
-  //         selectedOption,
-  //         deckId
-  //       )
-  //     );
-
-  //     console.log("checkAttempt: ", checkAttempt);
-
-  //     if (checkAttempt && checkAttempt.message === "Answer is correct!") {
-  //       setFeedback({ cardIndex, isCorrect: true });
-  //     } else if (
-  //       checkAttempt &&
-  //       checkAttempt.message === "Answer is incorrect."
-  //     ) {
-  //       setFeedback({
-  //         cardIndex,
-  //         isCorrect: false,
-  //         correctAnswer: checkAttempt.correctAnswer,
-  //       });
+  //     if (attempts) {
+  //       console.log("拿到Store裡面的attempts: ", attempts)
+  //       findAttemptRecord = attempts.attempts.filter(
+  //         (attempt) => attempt.deckId === deckId
+  //       );
   //     }
+
+  //     console.log("trying this...", findAttemptRecord)
+  //     //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
+  //     if (findAttemptRecord.length > 0) {
+  //       console.log("找到attempt紀錄: ", findAttemptRecord)
+  //       currentAttemptId = findAttemptRecord[0].id
+  //       const checkAttempt = await dispatch(
+  //         modifyUserAttempt(
+  //           user.uid,
+  //           questionId,
+  //           currentAttemptId,
+  //           // attemptId,
+  //           selectedOption,
+  //           deckId
+  //         )
+  //       );
+
+  //       console.log("checkAttempt: ", checkAttempt);
+  //       if (checkAttempt && checkAttempt.message === "You passed this deck!") {
+  //         setFeedback({ cardIndex, isCorrect: true });
+  //       }
+
+  //       else if (checkAttempt && checkAttempt.message === "Answer is correct!") {
+  //         setFeedback({ cardIndex, isCorrect: true });
+  //       } else if (
+  //         checkAttempt &&
+  //         checkAttempt.message === "Answer is incorrect."
+  //       ) {
+  //         setFeedback({
+  //           cardIndex,
+  //           isCorrect: false,
+  //           correctAnswer: checkAttempt.correctAnswer,
+  //         });
+  //       }
+
+  //     }
+
   //   } catch (error) {
   //     console.error("Error modifying user attempt:", error);
   //   }
   // };
+
+
 
   return (
     <>

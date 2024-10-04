@@ -1,6 +1,6 @@
 const express = require('express');
 // const { getAllDecks, getDeck, createDeck, addCardsToDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck } = require('../controllers/deckController');
-const { getAllDecks, getDeck, createDeck, addCardsToDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck } = require('../../../backend/controllers/deckController');
+const { getAllDecks, getDeck, createDeck, addCardsToDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck, ResetCardIsAttemptAndAttemptPasses } = require('../../../backend/controllers/deckController');
 
 const router = express.Router();
 
@@ -19,6 +19,8 @@ router.post('/new', createDeck);
 router.delete('/remove/:deckId', removeDeck);
 
 router.put('/update/:deckId', archiveDeck);
+
+router.put('/updatecards/:deckId', ResetCardIsAttemptAndAttemptPasses);
 
 router.get('/:deckId/attempt', getAttemptbyDeck);
 

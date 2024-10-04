@@ -205,6 +205,64 @@ const getArchivedDecksFromDB = async () => {
     }
 }
 
+//service to modify fileds in cards
+const modifyAttemptandCardsFromDB = async (req, res) => {
+    const { userId, attemptId } = req.body;
+
+    try {
+
+        //get attempt doucment by attemptId
+        const userDocRef = doc(db, 'users', userId);
+        const attemptDocRef = doc(userDocRef, 'attempts', attemptId);
+        const attemptDoc = await getDoc(attemptDocRef);
+
+
+        // get deck document by deckId
+        const deckDocRef = doc(db, 'decks', deckId);
+        const deckDoc = await getDoc(deckDocRef);
+
+        // Ensure attemptDoc and deckDoc exist
+        if (!attemptDoc.exists()) {
+            throw new Error('Attempt not found');
+        }
+        if (!deckDoc.exists()) {
+            throw new Error('Deck not found');
+        }
+
+        const deckData = deckDoc.data();
+        console.log("後端拿到的deckData: ", deckData)
+        console.log("後端拿到的deckDocRef: ", deckDocRef)
+        let cards = deckData.cards[0].questionData.jsonData
+
+
+
+        //reset isAttempt to be false for all cards
+        updateIsAttemptInCards = cards.map(card => {
+            return {
+                ...card,
+                isAttempted: false
+            }
+        })
+        console.log("想看看是不是真的改了: ", updateIsAttemptInCards)
+
+        //先解決needResetPasses
+        //變更card.isAttempt 和attempt.pass
+        await updateDoc(attemptDocRef, {
+            passes: 0
+        });
+        await updateDoc(deckDocRef, {
+            cards: updateIsAttemptInCards
+        });
+
+        console.log("改好後L: ", attemptDoc.data(), deckDoc.data())
+        return "updated 成功!!"
+
+
+    } catch (error) {
+        throw new Error('Error in db- modifyAttemptandCardsFromDB : ' + error.message);
+    }
+}
+
 //service to archive a deck
 const archiveDeckInDB = async (deckId, uid) => {
     console.log('archiveDeckInDB: ', deckId, uid)
@@ -334,5 +392,6 @@ module.exports = {
     archiveDeckInDB, getArchivedDecksFromDB,
     getUserArchivedDecksFromDB, getDeckFromDB,
     getUserDecksFromDB, getAttemptByDeckIdFromDB,
-    checkDeckIsInProgressFromDB, getUserDeckByIdFromDB
+    checkDeckIsInProgressFromDB, getUserDeckByIdFromDB,
+    modifyAttemptandCardsFromDB
 };

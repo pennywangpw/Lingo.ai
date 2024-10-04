@@ -154,9 +154,9 @@ export const createUserAttempt = (userId, attemptId) => async (dispatch) => {
 
 
 
-export const modifyUserAttempt = (userId, questionId, attemptId, answer, deckId) => async (dispatch) => {
+export const modifyUserAttempt = (userId, questionId, attemptId, answer, deckId, needResetPasses) => async (dispatch) => {
   // let payload = {userId, questionId, attemptId, answer, deckId}
-  let payload = { deckId, questionId, answer, attemptId }
+  let payload = { deckId, questionId, answer, attemptId, needResetPasses }
   console.log("是我的payload有傳錯嗎? ", payload)
   try {
     const response = await fetch(`/api/users/${userId}/attempts/${attemptId}/update`, {
@@ -207,7 +207,9 @@ const userAttemptsReducer = (state = initialState, action) => {
       }
 
       // Append action.allAttempts to the existing newState.attempts
-      newState.attempts = [...newState.attempts, ...action.allAttempts];
+      // newState.attempts = [...newState.attempts, ...action.allAttempts];
+      newState.attempts = [...action.allAttempts];
+
 
       console.log("Updated newState: ", newState);
 

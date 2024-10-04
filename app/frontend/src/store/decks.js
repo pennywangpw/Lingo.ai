@@ -92,11 +92,9 @@ export const fetchDecks = () => async (dispatch) => {
 
 export const fetchOneDeck = (deckId) => async (dispatch) => {
   try {
-    console.log("是否有連到")
     const response = await fetch(`/api/decks/${deckId}`)
     if (response.ok) {
       const deck = await response.json()
-      console.log("確認拿到的deck: ", deck)
 
       dispatch(loadOneDeck(deck));
     } else {
@@ -108,23 +106,6 @@ export const fetchOneDeck = (deckId) => async (dispatch) => {
   }
 };
 
-// // original fetchOneDeck
-// export const fetchOneDeck = (deckId) => async (dispatch) => {
-//   try {
-//     const deckDocRef = doc(db, "decks", deckId);
-//     const deckSnapshot = await getDoc(deckDocRef);
-
-//     if (deckSnapshot.exists()) {
-//       const deckData = { id: deckSnapshot.id, ...deckSnapshot.data() };
-//       console.log("看一眼長什麼樣: ", deckData)
-//       dispatch(loadOneDeck(deckData));
-//     } else {
-//       console.log("No such deck found!");
-//     }
-//   } catch (error) {
-//     console.error("Error fetching deck:", error);
-//   }
-// };
 
 export const updateDeckStatus = async (deckId, attemptId) => {
   try {

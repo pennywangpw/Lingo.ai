@@ -3,7 +3,7 @@ const { getDecksFromDB, createDeckInDB,
     removeDeckFromDB, archiveDeckInDB,
     getArchivedDecksFromDB, getUserArchivedDecksFromDB
     , getDeckFromDB,
-    getAttemptByDeckIdFromDB
+    getAttemptByDeckIdFromDB, modifyAttemptandCardsFromDB
 } = require('../services/deckService');
 const { doc, getDoc, addDoc, setDoc, collection } = require('firebase/firestore');
 const { db } = require('../firebase/firebaseConfig');
@@ -110,6 +110,29 @@ const archiveDeck = async (req, res) => {
 };
 
 
+const ResetCardIsAttemptAndAttemptPasses = async (req, res) => {
+    const { userId, attemptId } = req.body;
+    const { deckId } = req.params;
+
+    console.log("首先先確認有沒有盡到這裡:", userId, attemptId)
+    if (!attemptId || !userId) {
+        return res.status(400).json({ message: 'ResetCardIsAttemptAndAttemptPasses Missing deckId or uid' });
+    }
+
+    try {
+        const result = await modifyAttemptandCardsFromDB(deckId, uid);
+
+        if (result.success) {
+            return res.status(200).json({ message: result.message });
+        } else {
+            return res.status(400).json({ message: result.message });
+        }
+    } catch (error) {
+        res.status(500).json({ message: `Error archiving deck: ${error.message}` });
+    }
+};
+
+
 
 const getArchivedDecks = async (req, res) => {
     try {
@@ -141,4 +164,4 @@ const getAttemptbyDeck = async (req, res) => {
     }
 }
 
-module.exports = { getAllDecks, getDeck, createDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck };
+module.exports = { getAllDecks, getDeck, createDeck, removeCardFromDeck, removeDeck, archiveDeck, getArchivedDecks, getUserArchivedDecks, getAttemptbyDeck, ResetCardIsAttemptAndAttemptPasses };

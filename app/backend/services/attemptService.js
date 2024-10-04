@@ -76,6 +76,12 @@ const AddUserAttemptToDB = async (attemptData, id) => {
         const docRef = await addDoc(userAttemptsRef, attemptData);
         console.log('Document written with ID: ', docRef.id);
 
+        //add newattemptId to the deck
+        const currentdeckDocRef = doc(db, 'decks', attemptData.deckId);
+        await updateDoc(currentdeckDocRef, { attemptId: docRef.id });
+
+
+
         return docRef.id;
     } catch (error) {
         throw new Error('Error adding user attempt: ' + error.message);
@@ -86,12 +92,9 @@ const AddUserAttemptToDB = async (attemptData, id) => {
 //check if user selected answer is corret, if so, update attempt pass + attempt - > true
 //  also check if user passes 3 times that means the user passes the deck
 //if the user fails the question, attempt - > true
-const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
+const checkAnswerInDB = async (userId, id, attemptId, answer, deckId, needResetPasses) => {
     console.log('userId: ', userId, 'attemptId: ', attemptId, 'id: ', id, 'answer: ', answer, 'deckId: ', deckId);
     try {
-        if (!attemptId) {
-            throw new Error('Attempt ID is required.');
-        }
 
         //get attempt doucment by attemptId
         const userDocRef = doc(db, 'users', userId);
@@ -112,6 +115,10 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
 
         const deckData = deckDoc.data();
         console.log("後端拿到的deckData: ", deckData)
+
+
+
+
 
         // Ensure that cards and jsonData exist and are structured as expected
         if (!deckData.cards || !Array.isArray(deckData.cards) || !deckData.cards[0].questionData || !Array.isArray(deckData.cards[0].questionData.jsonData)) {
