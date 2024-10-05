@@ -91,7 +91,10 @@ const AddUserAttemptToDB = async (attemptData, id) => {
 
 //check if user selected answer is corret, if so, update attempt pass + attempt - > true
 //  also check if user passes 3 times that means the user passes the deck
-//if the user fails the question, attempt - > true
+// //if the user fails the question, attempt - > true
+
+
+//original one
 const checkAnswerInDB = async (userId, id, attemptId, answer, deckId, needResetPasses) => {
     console.log('userId: ', userId, 'attemptId: ', attemptId, 'id: ', id, 'answer: ', answer, 'deckId: ', deckId);
     try {
@@ -132,11 +135,13 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId, needResetP
         }
 
         const correctAnswer = deckData.cards[0].questionData.jsonData[questionIndex].answer;
-        const checkIfAttempted = deckData.cards[0].questionData.jsonData[questionIndex].isAttempted;
 
-        if (checkIfAttempted === true) {
-            throw new Error('Question already attempted');
-        }
+        //不檢查此項,決定讓user繼續玩
+        // const checkIfAttempted = deckData.cards[0].questionData.jsonData[questionIndex].isAttempted;
+
+        // if (checkIfAttempted === true) {
+        //     throw new Error('Question already attempted');
+        // }
 
         let feedbackMessage;
 

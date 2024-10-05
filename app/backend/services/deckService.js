@@ -150,6 +150,7 @@ const createDeckInDB = async ({ userId, topic_id, createdAt, archived }) => {
 //service to add cards to a deck
 const addCardsToDeckInDB = async (deckId, userId, aiGeneratedRequestId) => {
     try {
+        //only push cards from ai_generated_requests > questionData> jsonData in deck
         const deck = [];
         const userRef = doc(db, 'users', userId);
         const deckRef = doc(db, 'decks', deckId);
@@ -206,8 +207,9 @@ const getArchivedDecksFromDB = async () => {
 }
 
 //service to modify fileds in cards
-const modifyAttemptandCardsFromDB = async (req, res) => {
-    const { userId, attemptId } = req.body;
+const modifyAttemptandCardsFromDB = async (userId, attemptId, deckId) => {
+    console.log("deckservice有沒有盡到這裡:", userId, attemptId, deckId)
+
 
     try {
 
@@ -237,12 +239,35 @@ const modifyAttemptandCardsFromDB = async (req, res) => {
 
 
         //reset isAttempt to be false for all cards
-        updateIsAttemptInCards = cards.map(card => {
+        // updateIsAttemptInCards = cards.map(card => {
+        //     return {
+        //         ...card,
+        //         isAttempted: false
+        //     }
+        // })
+        // updateIsAttemptInCards = deckData.cards.map(card => {
+        //     card.questionData.jsonData.map(data => {
+        //         return {
+        //             ...data,
+        //             isAttempted: false
+        //         }
+
+        //     })
+        // })
+        let updateIsAttemptInCards = deckData.cards.map(card => {
             return {
                 ...card,
-                isAttempted: false
-            }
-        })
+                questionData: {
+                    ...card.questionData,
+                    jsonData: card.questionData.jsonData.map(question => {
+                        return {
+                            ...question,
+                            isAttempted: false  // Resetting isAttempted to false for each card
+                        }
+                    })
+                }
+            };
+        });
         console.log("想看看是不是真的改了: ", updateIsAttemptInCards)
 
         //先解決needResetPasses
@@ -254,8 +279,12 @@ const modifyAttemptandCardsFromDB = async (req, res) => {
             cards: updateIsAttemptInCards
         });
 
-        console.log("改好後L: ", attemptDoc.data(), deckDoc.data())
-        return "updated 成功!!"
+        const newattemptDoc = await getDoc(attemptDocRef);
+        const newdeckDoc = await getDoc(deckDocRef);
+
+
+        console.log("改好後L: ", newattemptDoc.data(), newdeckDoc.data().cards)
+        return newdeckDoc.data().cards
 
 
     } catch (error) {

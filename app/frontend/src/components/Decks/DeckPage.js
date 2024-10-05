@@ -154,19 +154,19 @@ function DeckPage() {
       }
 
 
-      // try {
+      try {
 
-      //   history.push({
-      //     pathname: `/decks/${deckId}`,
-      //     state: { userId: userId },
+        history.push({
+          pathname: `/decks/${deckId}`,
+          state: { userId: userId },
 
-      //     // state: { attemptId: newAttemptId, userId: userId },
-      //   });
-      //   console.log("Redirect......", newAttemptId);
+          // state: { attemptId: newAttemptId, userId: userId },
+        });
+        console.log("Redirect......", newAttemptId);
 
-      // } catch (error) {
-      //   console.error("Error starting attempt:", error);
-      // }
+      } catch (error) {
+        console.error("Error starting attempt:", error);
+      }
     } catch (error) {
       console.error("Error in InitialUserAttempt:", error.message);
     }

@@ -7,6 +7,8 @@ const { collection, getDocs, doc, updateDoc, setDoc, getDoc, FieldValue } = requ
 export const LOAD_DECKS = "concepts/LOAD_DECKS";
 export const LOAD_ONE_DECK = "concepts/LOAD_ONE_DECK";
 export const CREATE_NEW_DECK = "concepts/CREATE_NEW_DECK";
+export const UPDATE_DECK = "concepts/UPDATE_DECK";
+
 
 
 // Action Creators
@@ -26,6 +28,11 @@ const loadOneDeck = (deck) => ({
   deck,
 });
 
+const updateDeck = (deck) => ({
+  type: UPDATE_DECK,
+  deck
+
+});
 
 // //original fetchDecks
 // export const fetchDecks = (userId, topicId) => async (dispatch) => {
@@ -120,6 +127,27 @@ export const updateDeckStatus = async (deckId, attemptId) => {
   }
 };
 
+export const updateCardIsAttemtAttemptPasses = (userId, attemptId, deckId) => async (dispatch) => {
+  let payload = { userId, attemptId }
+  try {
+    const response = await fetch(`/api/decks/updatecards/${deckId}`, {
+      method: 'PUT',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }
+    )
+    if (response.ok) {
+      //do something...
+      const updateddeck = await response.json()
+      console.log("看一下update :", updateddeck)
+      dispatch(updateDeck(updateddeck)); // Optionally refresh the deck data
+
+
+    }
+  } catch (error) {
+    console.log("Reset error- updateCardIsAttemtAttemptPasses ", error)
+  }
+}
 
 export const createAttemptIfNotExists = (deckId, attemptId) => async (dispatch, getState) => {
   if (!attemptId) {

@@ -21,7 +21,7 @@ import {
   useLocation,
 } from "react-router-dom/cjs/react-router-dom.min";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchOneDeck } from "../../store/decks";
+import { fetchOneDeck, updateCardIsAttemtAttemptPasses } from "../../store/decks";
 import { fetchUserAttempt, modifyUserAttempt } from "../../store/attempt";
 
 function CardPage() {
@@ -29,9 +29,13 @@ function CardPage() {
   const theme = useTheme();
   const { deckId } = useParams();
   const location = useLocation();
+
   const user = useSelector((state) => state.session.user);
   const deck = useSelector((state) => state.decks.selectedDeck);
+  const attempts = useSelector((state) => state.attempts);
   const cards = deck?.deck?.cards?.[0]?.questionData?.jsonData || [];
+  // const cards = deck?.deck?.cards || [];
+
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
   //const attemptId = useSelector((state) => state.userAttempts);
@@ -40,60 +44,55 @@ function CardPage() {
   const topicLevel = deck?.level;
 
 
+  console.log("這裡的attempt 視為和 : ", attempts)
+  console.log("這裡的deck 視為和 : ", deck)
+  console.log("所有的卡片: ", cards)
+
+
+  //1.get user clicked deck in order to get cards in the deck
+  //2.get all attempts in order to get passes for checking with isAttempt in cards
+  //if user already played the cards but the user didn't pass (card.isAttempt = true !== deck.passes), Reset card.isAttempt = true AND deck.passes let user play again
   let findAttemptRecord = null
   let currentAttemptId = ""
   let needResetPasses = false
 
-  const attempts = useSelector((state) => state.attempts);
-  console.log("這裡的deck 視為和 : ", deck)
-  console.log("這裡的attempt 視為和 : ", attempts)
 
-  if (attempts.attempts.length > 1) {
+  findAttemptRecord = attempts?.attempts.filter(
+    (attempt) => attempt.deckId === deckId
+  );
+  console.log("這裡應該是拿到所有attempt裡面的重點", findAttemptRecord)
 
-    findAttemptRecord = attempts.attempts.filter(
-      (attempt) => attempt.deckId === deckId
-    );
-  }
-  else {
-    findAttemptRecord = attempts.attempts.newAttemptId
-  }
 
-  console.log("trying this...", findAttemptRecord)
+  //when get deck and cards
+  if (deck && cards) {
+    let cardAttemptCnt = 0
 
-  //檢查如果card.isAttempt = true 並且不等於 deck.passes,我就reset card.isAttempt 和attempt.pass再讓user挑戰一次
-  console.log("所有的卡片: ", cards)
-  console.log("deck的內容: ", deck)
-  let cardAttemptCnt = 0
-
-  for (let card of cards) {
-    if (card.isAttempted) {
-      cardAttemptCnt++
+    for (let card of cards) {
+      if (card.isAttempted) {
+        cardAttemptCnt++
+      }
     }
+
+    console.log("cardAttemptCnt: ", cardAttemptCnt)
+
+
+    //if AttemptRecord is found
+    if (findAttemptRecord) {
+      console.log("findAttemptRecord[0].passe", findAttemptRecord[0].passes)
+      if (cardAttemptCnt !== findAttemptRecord[0].passes) {
+        // reset passes in attempts
+        console.log("user touch的卡片不等於pass數量,代表user有試著答題但不通過",)
+
+        currentAttemptId = findAttemptRecord?.[0].id
+        needResetPasses = true
+        dispatch(
+          updateCardIsAttemtAttemptPasses(user.uid, currentAttemptId, deckId)
+        );
+      }
+
+    }
+
   }
-
-  console.log("cardAttemptCnt: ", cardAttemptCnt)
-
-  if (cardAttemptCnt !== findAttemptRecord[0].passes) {
-    //reset passes in attempts
-    console.log("user touch的卡片不等於pass數量",)
-
-    // currentAttemptId = findAttemptRecord?.[0].id
-    // needResetPasses = true
-    // dispatch(
-    //   modifyUserAttempt(
-    //     user.uid,
-    //     questionId,
-    //     currentAttemptId,
-    //     selectedOption,
-    //     deckId,
-    //     needResetPasses
-    //   )
-    // );
-  }
-
-
-
-
 
 
   useEffect(() => {
@@ -117,19 +116,6 @@ function CardPage() {
     console.log("cards[cardIndex]: ", cards[cardIndex])
     const selectedOption = cards[cardIndex].options[optionIndex];
 
-    findAttemptRecord = attempts.attempts.filter(
-      (attempt) => attempt.deckId === deckId
-    );
-
-    console.log("trying this...", findAttemptRecord)
-    //if the card has been attempted and user tries to replay it reset card.passes
-    if (cards[cardIndex].isAttempted) {
-      console.log("是否有盡到~")
-
-      alert(`You've attemmpted this card. correct answer is: ${cards[cardIndex].answer}`)
-    }
-
-    // const selectedOption = cards[cardIndex].options[optionIndex];
     try {
       // Update local state
       setSelectedAnswers((prevAnswers) => ({
@@ -137,54 +123,120 @@ function CardPage() {
         [cardIndex]: optionIndex,
       }));
 
-      if (attempts) {
-        console.log("拿到Store裡面的attempts: ", attempts)
-        findAttemptRecord = attempts.attempts.filter(
-          (attempt) => attempt.deckId === deckId
-        );
+
+      currentAttemptId = findAttemptRecord[0].id
+      const checkAttempt = await dispatch(
+        modifyUserAttempt(
+          user.uid,
+          questionId,
+          currentAttemptId,
+          // attemptId,
+          selectedOption,
+          deckId,
+          needResetPasses
+        )
+      );
+
+      console.log("checkAttempt: ", checkAttempt);
+      if (checkAttempt && checkAttempt.message === "You passed this deck!") {
+        setFeedback({ cardIndex, isCorrect: true });
       }
 
-      // console.log("trying this...", findAttemptRecord)
-      //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
-      if (findAttemptRecord.length > 0) {
-        console.log("找到attempt紀錄: ", findAttemptRecord)
-        currentAttemptId = findAttemptRecord[0].id
-        const checkAttempt = await dispatch(
-          modifyUserAttempt(
-            user.uid,
-            questionId,
-            currentAttemptId,
-            // attemptId,
-            selectedOption,
-            deckId,
-            needResetPasses
-          )
-        );
-
-        console.log("checkAttempt: ", checkAttempt);
-        if (checkAttempt && checkAttempt.message === "You passed this deck!") {
-          setFeedback({ cardIndex, isCorrect: true });
-        }
-
-        else if (checkAttempt && checkAttempt.message === "Answer is correct!") {
-          setFeedback({ cardIndex, isCorrect: true });
-        } else if (
-          checkAttempt &&
-          checkAttempt.message === "Answer is incorrect."
-        ) {
-          setFeedback({
-            cardIndex,
-            isCorrect: false,
-            correctAnswer: checkAttempt.correctAnswer,
-          });
-        }
-
+      else if (checkAttempt && checkAttempt.message === "Answer is correct!") {
+        setFeedback({ cardIndex, isCorrect: true });
+      } else if (
+        checkAttempt &&
+        checkAttempt.message === "Answer is incorrect."
+      ) {
+        setFeedback({
+          cardIndex,
+          isCorrect: false,
+          correctAnswer: checkAttempt.correctAnswer,
+        });
       }
+
+
 
     } catch (error) {
       console.error("Error modifying user attempt:", error);
     }
   };
+  //second
+  // const handleAnswerChange = async (cardIndex, optionIndex, questionId) => {
+  //   //check if card has been attempted, if so, pop out an alert to let user knows it's attempted
+  //   console.log("cards[cardIndex]: ", cards[cardIndex])
+  //   const selectedOption = cards[cardIndex].options[optionIndex];
+
+  //   findAttemptRecord = attempts.attempts.filter(
+  //     (attempt) => attempt.deckId === deckId
+  //   );
+
+  //   console.log("trying this...", findAttemptRecord)
+  //   //if the card has been attempted and user tries to replay it reset card.passes
+  //   if (cards[cardIndex].isAttempted) {
+  //     console.log("是否有盡到~")
+
+  //     alert(`You've attemmpted this card. correct answer is: ${cards[cardIndex].answer}`)
+  //   }
+
+  //   // const selectedOption = cards[cardIndex].options[optionIndex];
+  //   try {
+  //     // Update local state
+  //     setSelectedAnswers((prevAnswers) => ({
+  //       ...prevAnswers,
+  //       [cardIndex]: optionIndex,
+  //     }));
+
+  //     if (attempts) {
+  //       console.log("拿到Store裡面的attempts: ", attempts)
+  //       findAttemptRecord = attempts.attempts.filter(
+  //         (attempt) => attempt.deckId === deckId
+  //       );
+  //     }
+
+  //     // console.log("trying this...", findAttemptRecord)
+  //     //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
+  //     if (findAttemptRecord.length > 0) {
+  //       console.log("找到attempt紀錄: ", findAttemptRecord)
+  //       currentAttemptId = findAttemptRecord[0].id
+  //       const checkAttempt = await dispatch(
+  //         modifyUserAttempt(
+  //           user.uid,
+  //           questionId,
+  //           currentAttemptId,
+  //           // attemptId,
+  //           selectedOption,
+  //           deckId,
+  //           needResetPasses
+  //         )
+  //       );
+
+  //       console.log("checkAttempt: ", checkAttempt);
+  //       if (checkAttempt && checkAttempt.message === "You passed this deck!") {
+  //         setFeedback({ cardIndex, isCorrect: true });
+  //       }
+
+  //       else if (checkAttempt && checkAttempt.message === "Answer is correct!") {
+  //         setFeedback({ cardIndex, isCorrect: true });
+  //       } else if (
+  //         checkAttempt &&
+  //         checkAttempt.message === "Answer is incorrect."
+  //       ) {
+  //         setFeedback({
+  //           cardIndex,
+  //           isCorrect: false,
+  //           correctAnswer: checkAttempt.correctAnswer,
+  //         });
+  //       }
+
+  //     }
+
+  //   } catch (error) {
+  //     console.error("Error modifying user attempt:", error);
+  //   }
+  // };
+
+
   // const handleAnswerChange = async (cardIndex, optionIndex, questionId) => {
   //   console.log("user trying to answer the question.....")
   //   const selectedOption = cards[cardIndex].options[optionIndex];
@@ -258,7 +310,7 @@ function CardPage() {
         }}
       >
         <Grid container spacing={2}>
-          {cards.map((card, cardIndex) => (
+          {cards?.map((card, cardIndex) => (
 
             <React.Fragment key={card.id}>
               {/* QUESTION CARD */}
@@ -318,7 +370,7 @@ function CardPage() {
                           )
                         }
                       >
-                        {card.options.map((option, optionIndex) => (
+                        {card?.options.map((option, optionIndex) => (
                           <FormControlLabel
                             key={optionIndex}
                             value={optionIndex} // Set the index as the value

@@ -114,21 +114,25 @@ const ResetCardIsAttemptAndAttemptPasses = async (req, res) => {
     const { userId, attemptId } = req.body;
     const { deckId } = req.params;
 
-    console.log("首先先確認有沒有盡到這裡:", userId, attemptId)
+    console.log("首先先確認有沒有盡到這裡:", userId, attemptId, deckId)
     if (!attemptId || !userId) {
-        return res.status(400).json({ message: 'ResetCardIsAttemptAndAttemptPasses Missing deckId or uid' });
+        return res.status(400).json({ message: 'ResetCardIsAttemptAndAttemptPasses Missing attemptId or userId' });
     }
 
     try {
-        const result = await modifyAttemptandCardsFromDB(deckId, uid);
+        const decks = await modifyAttemptandCardsFromDB(userId, attemptId, deckId);
+        res.status(200).json({ decks });
 
-        if (result.success) {
-            return res.status(200).json({ message: result.message });
-        } else {
-            return res.status(400).json({ message: result.message });
-        }
+
+        // const result = await modifyAttemptandCardsFromDB(userId, attemptId, deckId);
+
+        // if (result.success) {
+        //     return res.status(200).json({ message: result.message });
+        // } else {
+        //     return res.status(400).json({ message: result.message });
+        // }
     } catch (error) {
-        res.status(500).json({ message: `Error archiving deck: ${error.message}` });
+        res.status(500).json({ message: `Error ResetCardIsAttemptAndAttemptPasses: ${error.message}` });
     }
 };
 

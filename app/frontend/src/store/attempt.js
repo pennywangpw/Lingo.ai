@@ -191,6 +191,7 @@ const initialState = {
   attempts: [],
   loading: false,
   error: null,
+  message: null
 };
 
 // Reducer
@@ -235,7 +236,7 @@ const userAttemptsReducer = (state = initialState, action) => {
     case LOAD_FIRST_USER_ATTEMPT:
       return {
         ...state,
-        attempts: action.newAttemptId
+        message: action.newAttemptId
       };
     case ADD_USER_ATTEMPT:
       return {
