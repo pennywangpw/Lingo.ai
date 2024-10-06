@@ -9,7 +9,6 @@ const getUserAttemptsFromDB = async (uid) => {
     try {
         const userRef = doc(db, 'users', uid);
         const userAttemptsRef = collection(userRef, 'attempts');
-        console.log('userAttemptsRef: ', userAttemptsRef);
         const userAttemptsSnapshot = await getDocs(userAttemptsRef);
         const userAttempts = userAttemptsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         return userAttempts;
@@ -34,17 +33,16 @@ const getUserAttemptByIDFromDB = async (uid, attemptId) => {
 }
 
 const checkAttemptInDB = async (userId, attemptId) => {
-    console.log('userId: ', userId, 'attemptId: ', attemptId);
-    console.log('hit here')
+
     try {
         const userRef = doc(db, 'users', userId);
         const attemptDocRef = doc(userRef, 'attempts', attemptId);
-        //console.log('attemptDocRef: ', attemptDocRef);
+
         const attemptDoc = await getDoc(attemptDocRef);
-        console.log('attemptDoc: ', attemptDoc);
+
         if (attemptDoc.exists()) {
             const attemptData = attemptDoc.data();
-            console.log('Attempt data:', attemptData);
+
 
             const { passes, totalQuestions } = attemptData;
             const percentagePassed = (passes / totalQuestions) * 100;
@@ -70,11 +68,11 @@ const AddUserAttemptToDB = async (attemptData, id) => {
 
         //attempt data = grab json data from frontend, its passed thru this and if it matches
         //with correct answer, add +1 to pass count for this attempt
-        console.log('進到adduserattempttodb attemptData: ', attemptData);
+
         const userDocRef = doc(db, 'users', id);
         const userAttemptsRef = collection(userDocRef, 'attempts')
         const docRef = await addDoc(userAttemptsRef, attemptData);
-        console.log('Document written with ID: ', docRef.id);
+
 
         //add newattemptId to the deck
         const currentdeckDocRef = doc(db, 'decks', attemptData.deckId);
@@ -96,7 +94,6 @@ const AddUserAttemptToDB = async (attemptData, id) => {
 
 //original one
 const checkAnswerInDB = async (userId, id, attemptId, answer, deckId, needResetPasses) => {
-    console.log('userId: ', userId, 'attemptId: ', attemptId, 'id: ', id, 'answer: ', answer, 'deckId: ', deckId);
     try {
 
         //get attempt doucment by attemptId
@@ -117,7 +114,6 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId, needResetP
         }
 
         const deckData = deckDoc.data();
-        console.log("後端拿到的deckData: ", deckData)
 
 
 
@@ -165,7 +161,7 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId, needResetP
             const isPassing = updatedAttemptData.passes >= 3;
 
             // if passes >= 3, call checkTopicProgression service
-            console.log('deck data', updatedAttemptData);
+
             if (isPassing) {
                 feedbackMessage = 'You passed this deck!';
                 //when the user passes the deck that also means the topics also pass, update topic pass
@@ -180,7 +176,6 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId, needResetP
 
             return { message: feedbackMessage, correctAnswer, updatedAttemptData };
         } else {
-            console.log("user答錯了 ", deckData.cards[0])
             deckData.cards[0].questionData.jsonData[questionIndex].isAttempted = true;
             await updateDoc(deckDocRef, {
                 cards: deckData.cards,  // Update the entire cards array
@@ -204,7 +199,6 @@ const updateUserAttemptInDB = async (uid, attemptId, updateData) => {
     try {
         const attemptDocRef = doc(db, 'users', uid, 'attempts', attemptId);
         await updateDoc(attemptDocRef, updateData);
-        console.log('Attempt updated:', attemptId);
     } catch (error) {
         throw new Error('Error updating user attempt: ' + error.message);
     }
@@ -217,7 +211,6 @@ const endUserAttemptInDB = async (uid, attemptId) => {
         const userDocRef = doc(db, 'users', uid);
         const attemptDocRef = doc(userDocRef, 'attempts', attemptId);
         await updateDoc(attemptDocRef, { status: 'ended', endTime: new Date() });
-        console.log('User attempt ended');
     } catch (error) {
         throw new Error('Error ending user attempt: ' + error.message);
     }

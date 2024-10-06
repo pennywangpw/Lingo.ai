@@ -25,35 +25,32 @@ import { fetchOneDeck, updateCardIsAttemtAttemptPasses } from "../../store/decks
 import { fetchUserAttempt, modifyUserAttempt } from "../../store/attempt";
 
 
+//1.get user clicked deck in order to get cards in the deck
+//2.get all attempts in order to get passes for checking with isAttempt in cards
+//if user already played the cards but the user didn't pass (card.isAttempt = true !== deck.passes), Reset card.isAttempt = true AND deck.passes let user play again
+
 function CardPage() {
   const dispatch = useDispatch();
   const theme = useTheme();
   const { deckId } = useParams();
   const location = useLocation();
-
-  const user = useSelector((state) => state.session.user);
-  const deck = useSelector((state) => state.decks.selectedDeck);
-  const attempts = useSelector((state) => state.attempts);
-  const cards = deck?.deck?.cards?.[0]?.questionData?.jsonData || [];
-
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
   const [replay, setReplay] = useState(true);
 
-  //const attemptId = useSelector((state) => state.userAttempts);
   const { attemptId, userId } = location.state || {};
+
+  const user = useSelector((state) => state.session.user);
+  const deck = useSelector((state) => state.decks.selectedDeck);
+  const cards = deck?.deck?.cards?.[0]?.questionData?.jsonData || [];
+  const attempts = useSelector((state) => state.attempts);
+
   const topicName = deck?.cards?.[0]?.questionData?.topic;
   const topicLevel = deck?.level;
 
 
-  console.log("這裡的attempt 視為和 : ", attempts)
-  console.log("這裡的deck 視為和 : ", deck)
-  console.log("所有的卡片: ", cards)
 
 
-  //1.get user clicked deck in order to get cards in the deck
-  //2.get all attempts in order to get passes for checking with isAttempt in cards
-  //if user already played the cards but the user didn't pass (card.isAttempt = true !== deck.passes), Reset card.isAttempt = true AND deck.passes let user play again
   let findAttemptRecord = null
   let currentAttemptId = ""
   let needResetPasses = false
@@ -65,49 +62,36 @@ function CardPage() {
 
 
 
-  //when get deck and cards
-  if (replay) {
-    console.log("這裡代表億要replay")
-    if (deck && cards) {
-      let cardAttemptCnt = 0
+  //Reset card.isAttempt = true AND deck.passes
+  if (replay && deck && cards) {
+    let cardAttemptCnt = 0
 
-      for (let card of cards) {
-        if (card.isAttempted) {
-          cardAttemptCnt++
-        }
+    for (let card of cards) {
+      if (card.isAttempted) {
+        cardAttemptCnt++
       }
-
-      console.log("cardAttemptCnt: ", cardAttemptCnt)
-
-
-      //if AttemptRecord is found
-      if (findAttemptRecord.length > 0) {
-        console.log("這裡會on fire是用來reset: cardAttemptCnt ,pass 數量: ", cardAttemptCnt, findAttemptRecord[0].passes)
-        if (cardAttemptCnt !== findAttemptRecord[0].passes) {
-          // reset passes in attempts
-          currentAttemptId = findAttemptRecord?.[0].id
-          needResetPasses = true
-          dispatch(
-            updateCardIsAttemtAttemptPasses(user.uid, currentAttemptId, deckId)
-          )
-        }
-
+    }
+    //if AttemptRecord is found
+    if (findAttemptRecord.length > 0) {
+      if (cardAttemptCnt !== findAttemptRecord[0].passes) {
+        // reset passes in attempts
+        currentAttemptId = findAttemptRecord?.[0].id
+        needResetPasses = true
+        dispatch(
+          updateCardIsAttemtAttemptPasses(user.uid, currentAttemptId, deckId)
+        )
       }
-
     }
   }
 
 
   useEffect(() => {
     dispatch(fetchOneDeck(deckId));
-    console.log("useEffect fetchOneDeck")
   }, [dispatch, deckId, attemptId]);
 
-  //因為attempt 資料裡面有紀載DeckId,而deckId又是獨一無二,拿到所有的attempt用deckId找出attempt紀錄
+
   useEffect(() => {
     dispatch(fetchUserAttempt(user.uid))
-    console.log("useEffect fetchUserAttempt")
-
   }, []);
 
 
@@ -116,10 +100,10 @@ function CardPage() {
   //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
   //if the attemptId can not be found, that means the deck hasn't been attempt yet (should not be this as we initial attempt before redirecting to card page)
   //if the attemptId can be found, that means the deck has been attempt and the user is trying to attempt again
-  //replay set to false,to avoid above
+  //replay set to false to avoid card.isAttempt = true AND deck.passes. The component will re-render due to state change
   const handleAnswerChange = async (cardIndex, optionIndex, questionId) => {
     //check if card has been attempted, if so, pop out an alert to let user knows it's attempted
-    console.log("cards[cardIndex]: ", cards[cardIndex])
+
     const selectedOption = cards[cardIndex].options[optionIndex];
 
     setReplay(false)
@@ -145,7 +129,6 @@ function CardPage() {
         )
       )
 
-      console.log("checkAttempt: ", checkAttempt);
       if (checkAttempt && checkAttempt.message === "You passed this deck!") {
         setFeedback({ cardIndex, isCorrect: true });
       }
@@ -162,7 +145,6 @@ function CardPage() {
           correctAnswer: checkAttempt.correctAnswer,
         });
       }
-
 
 
     } catch (error) {

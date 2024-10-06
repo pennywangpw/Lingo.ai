@@ -53,7 +53,7 @@ function DeckPage() {
   // Get the latest deck (first item in the sorted array)
   const sortedDecks = decksFilter?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const latestDeck = sortedDecks?.[0];
-  console.log("Latest deck:", latestDeck);
+
 
 
   //get CurrentUser progress to get current concept
@@ -128,7 +128,6 @@ function DeckPage() {
   //initial attempt OR try to find attempt record
   //redirect to card page
   const handleRedirectToCards = async (deckId) => {
-    console.log("handleRedirectToCards: ", deckId)
     try {
       //try to find attemptId for selected deck (fetch get all user attempts) find the one where deckId === deck.id
       //因為我有default casen所以一定會有return,但是要檢查return回來的東西是否有內容
@@ -137,7 +136,6 @@ function DeckPage() {
           (attempt) => attempt.deckId === deckId
         );
       }
-      console.log("findAttemptRecord: ", findAttemptRecord)
       //if CAN NOT find the attempt record
       if (findAttemptRecord.length === 0) {
         newAttemptId = await dispatch(
@@ -162,7 +160,6 @@ function DeckPage() {
 
           // state: { attemptId: newAttemptId, userId: userId },
         });
-        console.log("Redirect......", newAttemptId);
 
       } catch (error) {
         console.error("Error starting attempt:", error);
@@ -175,7 +172,6 @@ function DeckPage() {
   };
 
   const handleResumeAttempt = (deckId, attemptId) => {
-    console.log("我不解為何又到這裡來")
     history.push({
       pathname: `/decks/${deckId}`,
       state: { attemptId },
