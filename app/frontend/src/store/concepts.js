@@ -40,23 +40,44 @@ const loadConceptTopics = (conceptId, topics) => ({
 //   }
 // };
 
+// original fetchUserConcepts
+// export const fetchUserConcepts = (userId) => async (dispatch) => {
+//   try {
+
+//     const progressDocRef = doc(db, "progress", userId);
+
+//     const conceptRef = collection(progressDocRef, 'concepts');
+
+//     const conceptDoc = await getDocs(conceptRef);
+
+//     const concepts = conceptDoc.docs.map((doc) => ({
+//       id: doc.id,
+//       ...doc.data(),
+//     }))
+
+//     console.log("concept ", concepts)
+
+//     dispatch(loadConcepts(concepts));
+//   } catch (error) {
+//     throw new Error("Error fetching progress: " + error.message);
+//   }
+// };
+
 export const fetchUserConcepts = (userId) => async (dispatch) => {
   try {
 
-    const progressDocRef = doc(db, "progress", userId);
+    const response = await fetch(`/api/users/${userId}/progress`);
 
-    const conceptRef = collection(progressDocRef, 'concepts');
+    if (response.ok) {
+      console.log("res: ", response)
+      const userprogress = await response.json()
+      dispatch(loadConcepts(userprogress.progress.concepts));
+      console.log("userprogress : ", userprogress)
+      return userprogress
+    } else {
+      console.error("Response failed:", response.statusText);
+    }
 
-    const conceptDoc = await getDocs(conceptRef);
-
-    const concepts = conceptDoc.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
-
-    console.log("concept ", concepts)
-
-    dispatch(loadConcepts(concepts));
   } catch (error) {
     throw new Error("Error fetching progress: " + error.message);
   }
@@ -106,24 +127,13 @@ const initialState = {
 // Reducer
 const conceptsReducer = (state = initialState, action) => {
   switch (action.type) {
-    // case LOAD_CONCEPTS: {
-    //   const filteredConcepts = action.concepts
-    //     .filter((concept) => concept.level === action.userLevel)
-    //     .reduce((acc, concept) => {
-    //       acc[concept.id] = concept;
-    //       return acc;
-    //     }, {});
-
-    //   return {
-    //     ...state,
-    //     concepts: filteredConcepts,
-    //   };
     case LOAD_CONCEPTS: {
       console.log("ACTION", action)
       const newState = { ...state };
       action.concepts.forEach((concept) => {
         newState[concept.id] = concept;
       });
+      console.log("newstate: ", newState)
       return newState;
     }
     case LOAD_ONE_CONCEPT: {

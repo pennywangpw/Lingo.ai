@@ -16,7 +16,7 @@ const addUserToDB = async ({ uid, email, username, first_name, last_name, native
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     });
-    console.log('database', db)
+    // console.log('database', db)
 };
 
 const setUserLevel = async (uid, level) => {
@@ -64,7 +64,6 @@ const getUserByIdFromDB = async (id) => {
 
 // Service to get user progress
 const getProgressFromDB = async (uid) => {
-    console.log('get progress route is hit', uid);
     try {
         const progressDocRef = doc(db, 'progress', uid);
         const userDocRef = doc(db, 'users', uid);
@@ -74,9 +73,9 @@ const getProgressFromDB = async (uid) => {
         // Access the 'concepts' subcollection
         const conceptsCollectionRef = collection(progressDocRef, 'concepts');
         const conceptsSnapshot = await getDocs(conceptsCollectionRef);
-        console.log('Concepts snapshot:', conceptsSnapshot);
+        // console.log('Concepts snapshot:', conceptsSnapshot);
         const concepts = conceptsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log('Concepts:', concepts);
+        // console.log('Concepts:', concepts);
         return { uid, username: userDoc.data().username, level: userDoc.data().level, concepts };
     } catch (error) {
         throw new Error('Error fetching progress: ' + error.message);
@@ -95,19 +94,19 @@ const initializeUserProgress = async (uid, level = null) => {
         }
         // Create the 'concepts' subcollection
         const conceptsCollectionRef = collection(userDocRef, 'concepts');
-        console.log('Concepts collection ref:', conceptsCollectionRef);
+        // console.log('Concepts collection ref:', conceptsCollectionRef);
         const userInfo = userInfoSnap.data();
-        console.log('User info:', userInfo);
+        // console.log('User info:', userInfo);
         const currentLevel = level || userInfo.level;
 
         // Fetch existing concepts progress
         const existingConceptsSnapshot = await getDocs(conceptsCollectionRef);
-        console.log('Existing concepts snapshot:', existingConceptsSnapshot);
+        // console.log('Existing concepts snapshot:', existingConceptsSnapshot);
         const existingConcepts = existingConceptsSnapshot.docs.reduce((acc, doc) => {
             acc[doc.id] = doc.data();
             return acc;
         }, {});
-        console.log('Existing concepts:', existingConcepts);
+        // console.log('Existing concepts:', existingConcepts);
         let concepts = [];
         if (currentLevel === 'Advanced') {
             const [AdvancedConcepts, IntermediateConcepts, BeginnerConcepts] = await Promise.all([
@@ -205,7 +204,7 @@ const updateUserProgressFromDB = async (uid, topic_id) => {
                 ? parseFloat((topicsPassedCount / conceptData.topics.length).toFixed(1))
                 : 0.0;
 
-            // Update if any changes detected
+            // Update if any changes detected- check if topicsUpdated == true OR length of topic !== topicsPassed
             if (topicsUpdated || topicsPassedDecimal !== conceptData.topicsPassed) {
                 await updateDoc(conceptDoc.ref, {
                     topics: updatedTopics,

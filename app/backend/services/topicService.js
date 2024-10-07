@@ -1,5 +1,5 @@
 const { db } = require('../firebase/firebaseConfig');
-const { collection, addDoc, getDocs, updateDoc, getDoc, doc, query, where , deleteDoc } = require('firebase/firestore');
+const { collection, addDoc, getDocs, updateDoc, getDoc, doc, query, where, deleteDoc } = require('firebase/firestore');
 
 //service to view topics
 const getTopicsFromDB = async () => {
@@ -59,6 +59,7 @@ const checkTopicProgression = async (uid, topicId, isPassing, currentLevel) => {
             if (topic.id === topicId) {
                 //topic.passes = isPassing ? 3 : topic.passes + 1;
                 topic.passes += 1;
+                //check if the user get all topics pass and update topic status
                 if (topic.passes >= 3) {
                     topic.status = true;
                 }
@@ -82,54 +83,6 @@ const checkTopicProgression = async (uid, topicId, isPassing, currentLevel) => {
         throw new Error('Error updating topic: ' + error.message);
     }
 };
-
-
-
-// const checkTopicProgression = async (topicId, passes) => {
-//     //use this service to check curr_passes and update status
-//     //calling this means
-//     try {
-//         const topicRef = doc(db, 'topics', topicId);
-//         const topicDoc = await getDoc(topicRef);
-
-//         // Check if the document exists before updating
-//         // if (!topicDoc.exists()) {
-//         //     throw new Error(`Topic document with ID ${topicId} does not exist`);
-//         // }
-
-//         // Update the passes field
-//         await updateDoc(topicRef, { passes });
-
-//         // Fetch the updated document
-//         const updatedTopic = await getDoc(topicRef);
-//         const curr_passes = updatedTopic.data().passes;
-
-//         // Check if the passes have reached 3 and update the status
-//         if (curr_passes === 3) {
-//             await updateDoc(topicRef, { status: true });
-//             console.log('Topic status updated to true');
-//         }
-
-//         console.log('Topic passes:', curr_passes);
-
-//     } catch (error) {
-//         throw new Error('Error updating topic: ' + error.message);
-//     }
-    // console.log(topicId, 'passes: ', passes)
-    // try {
-    //     const topicRef = doc(db, 'topics', topicId);
-    //     await updateDoc(topicRef, { passes });
-    //     const topic = await getDoc(topicRef);
-    //     console.log('passes: ', topic.data().passes)
-    //     const curr_passes = topic.data().passes
-    //     if (curr_passes === 3) {
-    //         await updateDoc(topicRef, { status: true });
-    //     }
-
-    // } catch (error) {
-    //     throw new Error('Error updating topic: ' + error.message);
-    // }
-//}
 
 
 const addTopicToDB = async (topicData) => {

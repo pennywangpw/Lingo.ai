@@ -1,14 +1,26 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const userRoutes = require('../frontend/src/routes/userRoutes');
-const authRoutes = require('../frontend/src/routes/authRoutes');
-const conceptRoutes = require('../frontend/src/routes/conceptRoutes');
-const topicRoutes = require('../frontend/src/routes/topicRoutes');
-const levelRoutes = require('../frontend/src/routes/levelRoutes');
-const aiRoutes = require('../frontend/src/routes/aiRoutes');
+// const userRoutes = require('../frontend/src/routes/userRoutes');
+// const authRoutes = require('../frontend/src/routes/authRoutes');
+// const conceptRoutes = require('../frontend/src/routes/conceptRoutes');
+// const topicRoutes = require('../frontend/src/routes/topicRoutes');
+// const levelRoutes = require('../frontend/src/routes/levelRoutes');
+// const aiRoutes = require('../frontend/src/routes/aiRoutes');
+// const deckRoutes = require('../frontend/src/routes/deckRoutes');
 
-const deckRoutes = require('../frontend/src/routes/deckRoutes');
+
+const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
+const conceptRoutes = require('./routes/conceptRoutes');
+const topicRoutes = require('./routes/topicRoutes');
+const levelRoutes = require('./routes/levelRoutes');
+
+const aiRoutes = require('./routes/aiRoutes');
+const deckRoutes = require('./routes/deckRoutes');
+
+
+
 
 const app = express();
 const port = process.env.PORT || 5000;

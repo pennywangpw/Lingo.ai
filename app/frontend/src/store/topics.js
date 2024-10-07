@@ -33,9 +33,11 @@ export const fetchTopics = () => async (dispatch) => {
     }
 };
 
+
 export const fetchTopicsThroughProgress = (userId) => async (dispatch) => {
+    console.log("am i hitting fetchTopicsThroughProgress")
     try {
-   
+
         const progressDocRef = doc(db, "progress", userId);
 
         const conceptRef = collection(progressDocRef, 'concepts');
@@ -44,15 +46,15 @@ export const fetchTopicsThroughProgress = (userId) => async (dispatch) => {
 
         const topics = conceptDoc.docs.map((doc) => ({
             id: doc.id,
-              ...doc.data(),
-            }))
-            
-        console.log("topics", topics)
-    
+            ...doc.data(),
+        }))
+
+        console.log("fetch topics through progress : topics", topics)
+
         dispatch(loadTopics(topics));
-      } catch (error) {
+    } catch (error) {
         throw new Error("Error fetching progress: " + error.message);
-      }
+    }
 }
 
 export const fetchOneTopic = (topicId) => async (dispatch) => {

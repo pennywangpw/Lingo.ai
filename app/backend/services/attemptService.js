@@ -9,7 +9,6 @@ const getUserAttemptsFromDB = async (uid) => {
     try {
         const userRef = doc(db, 'users', uid);
         const userAttemptsRef = collection(userRef, 'attempts');
-        console.log('userAttemptsRef: ', userAttemptsRef);
         const userAttemptsSnapshot = await getDocs(userAttemptsRef);
         const userAttempts = userAttemptsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         return userAttempts;
@@ -34,17 +33,16 @@ const getUserAttemptByIDFromDB = async (uid, attemptId) => {
 }
 
 const checkAttemptInDB = async (userId, attemptId) => {
-    console.log('userId: ', userId, 'attemptId: ', attemptId);
-    console.log('hit here')
+
     try {
         const userRef = doc(db, 'users', userId);
         const attemptDocRef = doc(userRef, 'attempts', attemptId);
-        //console.log('attemptDocRef: ', attemptDocRef);
+
         const attemptDoc = await getDoc(attemptDocRef);
-        console.log('attemptDoc: ', attemptDoc);
+
         if (attemptDoc.exists()) {
             const attemptData = attemptDoc.data();
-            console.log('Attempt data:', attemptData);
+
 
             const { passes, totalQuestions } = attemptData;
             const percentagePassed = (passes / totalQuestions) * 100;
@@ -67,13 +65,20 @@ const checkAttemptInDB = async (userId, attemptId) => {
 //Service to add user attempt; call this service after user starts a deck
 const AddUserAttemptToDB = async (attemptData, id) => {
     try {
+
         //attempt data = grab json data from frontend, its passed thru this and if it matches
         //with correct answer, add +1 to pass count for this attempt
-        console.log('attemptData: ', attemptData);
+
         const userDocRef = doc(db, 'users', id);
         const userAttemptsRef = collection(userDocRef, 'attempts')
         const docRef = await addDoc(userAttemptsRef, attemptData);
-        console.log('Document written with ID: ', docRef.id);
+
+
+        //add newattemptId to the deck
+        const currentdeckDocRef = doc(db, 'decks', attemptData.deckId);
+        await updateDoc(currentdeckDocRef, { attemptId: docRef.id });
+
+
 
         return docRef.id;
     } catch (error) {
@@ -81,16 +86,22 @@ const AddUserAttemptToDB = async (attemptData, id) => {
     }
 }
 
-const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
-    console.log('userId: ', userId, 'attemptId: ', attemptId, 'id: ', id, 'answer: ', answer, 'deckId: ', deckId);
-    try {
-        if (!attemptId) {
-            throw new Error('Attempt ID is required.');
-        }
 
+//check if user selected answer is corret, if so, update attempt pass + attempt - > true
+//  also check if user passes 3 times that means the user passes the deck
+// //if the user fails the question, attempt - > true
+
+
+//original one
+const checkAnswerInDB = async (userId, id, attemptId, answer, deckId, needResetPasses) => {
+    try {
+
+        //get attempt doucment by attemptId
         const userDocRef = doc(db, 'users', userId);
         const attemptDocRef = doc(userDocRef, 'attempts', attemptId);
         const attemptDoc = await getDoc(attemptDocRef);
+
+        // get deck document by deckId
         const deckDocRef = doc(db, 'decks', deckId);
         const deckDoc = await getDoc(deckDocRef);
 
@@ -104,6 +115,10 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
 
         const deckData = deckDoc.data();
 
+
+
+
+
         // Ensure that cards and jsonData exist and are structured as expected
         if (!deckData.cards || !Array.isArray(deckData.cards) || !deckData.cards[0].questionData || !Array.isArray(deckData.cards[0].questionData.jsonData)) {
             throw new Error('Invalid data structure: jsonData is not an array or cards are not structured correctly');
@@ -116,14 +131,18 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
         }
 
         const correctAnswer = deckData.cards[0].questionData.jsonData[questionIndex].answer;
-        const checkIfAttempted = deckData.cards[0].questionData.jsonData[questionIndex].isAttempted;
 
-        if (checkIfAttempted === true) {
-            throw new Error('Question already attempted');
-        }
+        //不檢查此項,決定讓user繼續玩
+        // const checkIfAttempted = deckData.cards[0].questionData.jsonData[questionIndex].isAttempted;
+
+        // if (checkIfAttempted === true) {
+        //     throw new Error('Question already attempted');
+        // }
 
         let feedbackMessage;
 
+        //對答案,變更pass
+        //確認是否已經有3個pass
         if (answer === correctAnswer) {
             // Mark the question as attempted
             deckData.cards[0].questionData.jsonData[questionIndex].isAttempted = true;
@@ -142,15 +161,20 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
             const isPassing = updatedAttemptData.passes >= 3;
 
             // if passes >= 3, call checkTopicProgression service
-            console.log('deck data', updatedAttemptData);
+
             if (isPassing) {
                 feedbackMessage = 'You passed this deck!';
+                //when the user passes the deck that also means the topics also pass, update topic pass
+                //also update user progress topicsPasses
                 await checkTopicProgression(deckData.userId, deckData.cards[0].questionData.topic_id, isPassing);
                 await archiveDeckInDB(deckId, deckData.userId);
+            } else {
+
+                // return { message: 'Answer is correct!' };
+                feedbackMessage = 'Answer is correct!';
             }
 
-            // return { message: 'Answer is correct!' };
-            feedbackMessage = 'Answer is correct!';
+            return { message: feedbackMessage, correctAnswer, updatedAttemptData };
         } else {
             deckData.cards[0].questionData.jsonData[questionIndex].isAttempted = true;
             await updateDoc(deckDocRef, {
@@ -158,9 +182,10 @@ const checkAnswerInDB = async (userId, id, attemptId, answer, deckId) => {
             });
             // return { message: 'Answer is incorrect.', correctAnswer };
             feedbackMessage = 'Answer is incorrect.';
+            return { message: feedbackMessage, correctAnswer };
         }
-
-        return { message: feedbackMessage, correctAnswer };
+        //問題:db有變更pass數量,但是store沒有變更
+        // return { message: feedbackMessage, correctAnswer };
     } catch (error) {
         throw new Error('Error checking answer: ' + error.message);
     }
@@ -174,7 +199,6 @@ const updateUserAttemptInDB = async (uid, attemptId, updateData) => {
     try {
         const attemptDocRef = doc(db, 'users', uid, 'attempts', attemptId);
         await updateDoc(attemptDocRef, updateData);
-        console.log('Attempt updated:', attemptId);
     } catch (error) {
         throw new Error('Error updating user attempt: ' + error.message);
     }
@@ -187,7 +211,6 @@ const endUserAttemptInDB = async (uid, attemptId) => {
         const userDocRef = doc(db, 'users', uid);
         const attemptDocRef = doc(userDocRef, 'attempts', attemptId);
         await updateDoc(attemptDocRef, { status: 'ended', endTime: new Date() });
-        console.log('User attempt ended');
     } catch (error) {
         throw new Error('Error ending user attempt: ' + error.message);
     }

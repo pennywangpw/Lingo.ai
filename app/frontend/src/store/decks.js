@@ -6,8 +6,18 @@ const { collection, getDocs, doc, updateDoc, setDoc, getDoc, FieldValue } = requ
 // Action Types
 export const LOAD_DECKS = "concepts/LOAD_DECKS";
 export const LOAD_ONE_DECK = "concepts/LOAD_ONE_DECK";
+export const CREATE_NEW_DECK = "concepts/CREATE_NEW_DECK";
+export const UPDATE_DECK = "concepts/UPDATE_DECK";
+
+
 
 // Action Creators
+
+const createNewDeck = (deck) => ({
+  type: CREATE_NEW_DECK,
+  deck,
+});
+
 const loadDecks = (decks) => ({
   type: LOAD_DECKS,
   decks,
@@ -18,21 +28,67 @@ const loadOneDeck = (deck) => ({
   deck,
 });
 
+const updateDeck = (deck) => ({
+  type: UPDATE_DECK,
+  deck
+
+});
+
+// //original fetchDecks
+// export const fetchDecks = (userId, topicId) => async (dispatch) => {
+//   try {
+//     const userDocRef = doc(db, 'users', userId);
+//     const userDoc = await getDoc(userDocRef);
+//     if (!userDoc.exists()) {
+//       throw new Error('User not found');
+//     }
+//     const userDecksCollectionRef = collection(userDocRef, 'decks');
+//     const userDecksSnapshot = await getDocs(userDecksCollectionRef);
+//     const userDecks = userDecksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+//     dispatch(loadDecks(userDecks));
+//   } catch (error) {
+//     console.error("Error fetching decks:", error);
+//   }
+// };
+
+
+export const createDeck = (userId, aiGeneratedRequestId) => async (dispatch) => {
+  console.log("----createDeck userId, aiGeneratedRequestId: ", userId, aiGeneratedRequestId)
+  let payload = {
+    userId,
+    aiGeneratedRequestId
+  }
+  try {
+    const response = await fetch(`/api/decks/new`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    if (response.ok) {
+      const newdeck = await response.json()
+
+      dispatch(createNewDeck(newdeck.decks));
+
+      // const alldecks = await response.json()
+
+      // dispatch(loadDecks(alldecks.decks));
+      return newdeck
+    }
+  } catch (error) {
+    console.error("Error fetching decks:", error);
+  }
+};
 
 // Thunk Actions
-export const fetchDecks = (userId, topicId) => async (dispatch) => {
+export const fetchDecks = () => async (dispatch) => {
   try {
+    const response = await fetch(`/api/decks/all`)
+    if (response.ok) {
+      const alldecks = await response.json()
 
-    const userDocRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-        throw new Error('User not found');
+      dispatch(loadDecks(alldecks.decks));
     }
-    const userDecksCollectionRef = collection(userDocRef, 'decks');
-    const userDecksSnapshot = await getDocs(userDecksCollectionRef);
-    const userDecks = userDecksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    dispatch(loadDecks(userDecks));
   } catch (error) {
     console.error("Error fetching decks:", error);
   }
@@ -41,22 +97,22 @@ export const fetchDecks = (userId, topicId) => async (dispatch) => {
 
 
 
-
 export const fetchOneDeck = (deckId) => async (dispatch) => {
   try {
-    const deckDocRef = doc(db, "decks", deckId);
-    const deckSnapshot = await getDoc(deckDocRef);
+    const response = await fetch(`/api/decks/${deckId}`)
+    if (response.ok) {
+      const deck = await response.json()
 
-    if (deckSnapshot.exists()) {
-      const deckData = { id: deckSnapshot.id, ...deckSnapshot.data() };
-      dispatch(loadOneDeck(deckData));
+      dispatch(loadOneDeck(deck));
     } else {
-      console.log("No such deck found!");
+      console.log("no....")
     }
+
   } catch (error) {
     console.error("Error fetching deck:", error);
   }
 };
+
 
 export const updateDeckStatus = async (deckId, attemptId) => {
   try {
@@ -71,6 +127,27 @@ export const updateDeckStatus = async (deckId, attemptId) => {
   }
 };
 
+export const updateCardIsAttemtAttemptPasses = (userId, attemptId, deckId) => async (dispatch) => {
+  let payload = { userId, attemptId }
+  try {
+    const response = await fetch(`/api/decks/updatecards/${deckId}`, {
+      method: 'PUT',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }
+    )
+    if (response.ok) {
+      //do something...
+      const updateddeck = await response.json()
+      console.log("看一下update :", updateddeck)
+      dispatch(updateDeck(updateddeck)); // Optionally refresh the deck data
+
+
+    }
+  } catch (error) {
+    console.log("Reset error- updateCardIsAttemtAttemptPasses ", error)
+  }
+}
 
 export const createAttemptIfNotExists = (deckId, attemptId) => async (dispatch, getState) => {
   if (!attemptId) {
@@ -114,6 +191,11 @@ const decksReducer = (state = initialState, action) => {
       return {
         ...state,
         selectedDeck: action.deck,
+      };
+    case CREATE_NEW_DECK:
+      return {
+        ...state,
+        newDeck: action.deck,
       };
     default:
       return state;

@@ -5,7 +5,7 @@ const { collection, addDoc, getDocs, updateDoc, getDoc, doc, query, where, Times
 const getDecksFromDB = async () => {
     try {
         const querySnapshot = await getDocs(collection(db, 'decks'));
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return querySnapshot.docs.map(doc => ({ id: doc.id, deck_name: doc.id.slice(0, 4), ...doc.data() }));
     } catch (error) {
         throw new Error('Error fetching decks: ' + error.message);
     }
@@ -150,6 +150,7 @@ const createDeckInDB = async ({ userId, topic_id, createdAt, archived }) => {
 //service to add cards to a deck
 const addCardsToDeckInDB = async (deckId, userId, aiGeneratedRequestId) => {
     try {
+        //only push cards from ai_generated_requests > questionData> jsonData in deck
         const deck = [];
         const userRef = doc(db, 'users', userId);
         const deckRef = doc(db, 'decks', deckId);
@@ -188,7 +189,7 @@ const addCardsToDeckInDB = async (deckId, userId, aiGeneratedRequestId) => {
 
         // Update the deck with the new cards
         await setDoc(deckRef, { ...deckDoc.data(), cards: deck }, { merge: true });
-        console.log('deckdeckdeck',deck )
+        console.log('deckdeckdeck', deck)
         return deck;
     } catch (error) {
         throw new Error('Error adding card to deck: ' + error.message);
@@ -202,6 +203,92 @@ const getArchivedDecksFromDB = async () => {
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
         throw new Error('Error fetching archived decks: ' + error.message);
+    }
+}
+
+//service to modify fileds in cards
+const modifyAttemptandCardsFromDB = async (userId, attemptId, deckId) => {
+    console.log("deckservice有沒有盡到這裡:", userId, attemptId, deckId)
+
+
+    try {
+
+        //get attempt doucment by attemptId
+        const userDocRef = doc(db, 'users', userId);
+        const attemptDocRef = doc(userDocRef, 'attempts', attemptId);
+        const attemptDoc = await getDoc(attemptDocRef);
+
+
+        // get deck document by deckId
+        const deckDocRef = doc(db, 'decks', deckId);
+        const deckDoc = await getDoc(deckDocRef);
+
+        // Ensure attemptDoc and deckDoc exist
+        if (!attemptDoc.exists()) {
+            throw new Error('Attempt not found');
+        }
+        if (!deckDoc.exists()) {
+            throw new Error('Deck not found');
+        }
+
+        const deckData = deckDoc.data();
+        console.log("後端拿到的deckData: ", deckData)
+        console.log("後端拿到的deckDocRef: ", deckDocRef)
+        let cards = deckData.cards[0].questionData.jsonData
+
+
+
+        //reset isAttempt to be false for all cards
+        // updateIsAttemptInCards = cards.map(card => {
+        //     return {
+        //         ...card,
+        //         isAttempted: false
+        //     }
+        // })
+        // updateIsAttemptInCards = deckData.cards.map(card => {
+        //     card.questionData.jsonData.map(data => {
+        //         return {
+        //             ...data,
+        //             isAttempted: false
+        //         }
+
+        //     })
+        // })
+        let updateIsAttemptInCards = deckData.cards.map(card => {
+            return {
+                ...card,
+                questionData: {
+                    ...card.questionData,
+                    jsonData: card.questionData.jsonData.map(question => {
+                        return {
+                            ...question,
+                            isAttempted: false  // Resetting isAttempted to false for each card
+                        }
+                    })
+                }
+            };
+        });
+        console.log("想看看是不是真的改了: ", updateIsAttemptInCards)
+
+        //先解決needResetPasses
+        //變更card.isAttempt 和attempt.pass
+        await updateDoc(attemptDocRef, {
+            passes: 0
+        });
+        await updateDoc(deckDocRef, {
+            cards: updateIsAttemptInCards
+        });
+
+        const newattemptDoc = await getDoc(attemptDocRef);
+        const newdeckDoc = await getDoc(deckDocRef);
+
+
+        console.log("改好後L: ", newattemptDoc.data(), newdeckDoc.data().cards)
+        return newdeckDoc.data().cards
+
+
+    } catch (error) {
+        throw new Error('Error in db- modifyAttemptandCardsFromDB : ' + error.message);
     }
 }
 
@@ -334,5 +421,6 @@ module.exports = {
     archiveDeckInDB, getArchivedDecksFromDB,
     getUserArchivedDecksFromDB, getDeckFromDB,
     getUserDecksFromDB, getAttemptByDeckIdFromDB,
-    checkDeckIsInProgressFromDB, getUserDeckByIdFromDB
+    checkDeckIsInProgressFromDB, getUserDeckByIdFromDB,
+    modifyAttemptandCardsFromDB
 };

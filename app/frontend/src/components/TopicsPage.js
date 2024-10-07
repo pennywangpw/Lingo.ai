@@ -11,40 +11,43 @@ import { useParams } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { fetchUserProgress } from '../store/users';
 import { useTheme } from "@emotion/react";
-import CheckIcon from '@mui/icons-material/Check';
-import { fetchTopicsThroughProgress } from "../store/topics";
-import { fetchUserConcepts } from "../store/concepts";
+// import CheckIcon from '@mui/icons-material/Check';
+// import { fetchTopicsThroughProgress } from "../store/topics";
+// import { fetchUserConcepts } from "../store/concepts";
 
 function TopicsPage() {
+  //1.get current concept
+  //2.get all topics under the concept
   const dispatch = useDispatch();
   const user = useSelector((state) => state.session.user)
   const userId = user.uid;
   const { conceptId } = useParams();
   const [loading, setLoading] = useState(true);
-  const topics = useSelector((state) => state.topics);
   const progressState = useSelector((state) => state.users.progress);
   const progress = progressState && Object.values(progressState)
-  const concepts = Object.values(useSelector((state) => state.concepts));
+  // const topics = useSelector((state) => state.topics);
+  // const concepts = Object.values(useSelector((state) => state.concepts));
 
   const theme = useTheme()
 
+  //get current concept
   const currentConcept = progress?.[0]?.concepts?.find(concept =>
     conceptId === concept.id
   );
 
-  console.log("CC", currentConcept);
+  //get all topics under current concept
+  const topicsUnderCurrentConcept = currentConcept?.topics
 
-  const currConcept = concepts.find(concept => conceptId === concept.id);
+
+  // const currConcept = concepts.find(concept => conceptId === concept.id);
 
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      // await dispatch(fetchOneConcept(conceptId));
-      // await dispatch(fetchTopicsByConcept(conceptId));
       await dispatch(fetchUserProgress(userId))
-      await dispatch(fetchTopicsThroughProgress(userId))
-      await dispatch(fetchUserConcepts(userId))
+      // await dispatch(fetchTopicsThroughProgress(userId))
+      // await dispatch(fetchUserConcepts(userId))
 
       setLoading(false);
     };
@@ -52,14 +55,17 @@ function TopicsPage() {
     fetchData();
   }, [dispatch, userId]);
 
-  const combinedTopics = currentConcept?.topics?.map(topic => {
-    const progressData = currConcept?.topics?.find(p => topic.id === p.id)
-    return {
-      ...topic,
-      topic_name: progressData?.topic_name,
-      description: progressData?.description
-    }
-  })
+
+
+  // const combinedTopics = currentConcept?.topics?.map(topic => {
+  //   const progressData = currConcept?.topics?.find(p => topic.id === p.id)
+  //   return {
+  //     ...topic,
+  //     topic_name: progressData?.topic_name,
+  //     description: progressData?.description
+  //   }
+  // })
+  // console.log("combinedTopics ?", combinedTopics)
 
   if (loading) {
     return <LinearProgress />;
@@ -115,7 +121,7 @@ function TopicsPage() {
       </Box>
 
       <Grid container spacing={10} justifyContent='center' py={5}>
-        {combinedTopics?.map(topic => (
+        {topicsUnderCurrentConcept?.map(topic => (
           <Grid item key={topic.id}>
             <Button component={NavLink}
               to={`/concepts/${conceptId}/topics/${topic.id}/decks`}
@@ -149,11 +155,12 @@ function TopicsPage() {
                   sx={{
                     height: "50px"
                   }}>
-                  {topic.description ? (<p>{topic.description}</p>) : (<p>&nbsp;</p>)}
+                  {topic.topic_description ? (<p>{topic.topic_description}</p>) : (<p>&nbsp;</p>)}
                 </Box>
                 <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%', margin: 'auto' }}>
                   <LinearProgress
                     variant="determinate"
+                    //we only set up for 3 cards so we divide by 3
                     value={(topic.passes / 3) * 100}
                     sx={{ height: 25, width: '100%', borderRadius: '3px' }}
                     color='secondary'

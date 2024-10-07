@@ -54,7 +54,7 @@ const getUserById = async (req, res) => {
   }
 };
 
-// Get user progress
+// Get user progress-{progress:{uid,username,concepts:[{id,status,level,topics}]}}
 const getUserProgress = async (req, res) => {
   const { id } = req.params;
   try {
@@ -67,9 +67,11 @@ const getUserProgress = async (req, res) => {
   }
 };
 
+//check if topic status and how many "pass" the user gets from topic: update TopicPasses
+
 const updateUserProgress = async (req, res) => {
   const { id } = req.params;
-  console.log("update user progress route is hit", id);
+  // console.log("update user progress route is hit", id);
   try {
     await updateUserProgressFromDB(id);
     const progress = await getProgressFromDB(id);
@@ -124,7 +126,7 @@ const checkUserAttempt = async (req, res) => {
   }
 };
 
-// Start new user attempt
+// Start new user attempt: deckId, passes, totalQuestions, createdAt
 const addUserAttempt = async (req, res) => {
   const { id } = req.params;
   const {
@@ -133,7 +135,7 @@ const addUserAttempt = async (req, res) => {
     totalQuestions = 3,
     createdAt = new Date().toISOString(),
   } = req.body;
-  console.log("id: ", id);
+  console.log("addUserAttempt id: ", id, deckId);
   try {
     const attemptData = { deckId, passes, totalQuestions, createdAt };
     const newAttemptId = await AddUserAttemptToDB(attemptData, id);
@@ -145,30 +147,26 @@ const addUserAttempt = async (req, res) => {
   }
 };
 
+//update user attempt with data: userId, id, attemptId, answer, deckId
+//check if user selected answer is corret, if so, update attempt pass + attempt - > true
+//  also check if user passes 3 times that means the user passes the deck (need to update topic pass and updatae topic status if all topics are passed)
+//if the user fails the question, attempt - > true
 const updateUserAttempt = async (req, res) => {
-  const { userId, attemptId } = req.params;
-  const { deckId, id, answer } = req.body;
-  console.log(
-    "userId: ",
-    userId,
-    "attemptId: ",
-    attemptId,
-    "deckId: ",
-    deckId,
-    "id: ",
-    id, //index of the answer they selected
-    "answer: ",
-    answer
-  );
+  // const { userId, attemptId } = req.params;
+  console.log("有盡到update user attempt api...")
+  const { userId } = req.params;  //
+  const { deckId, questionId, answer, attemptId, needResetPasses } = req.body;
+  console.log("-------userId: ", userId, "attemptId: ", attemptId, "deckId: ", deckId, "questionId: ", questionId, "answer: ", answer, "needResetPasses: ", needResetPasses);
   try {
     const checkAttempt = await checkAnswerInDB(
       userId,
-      id,
+      questionId,
       attemptId,
       answer,
-      deckId
+      deckId,
+      needResetPasses
     );
-    res.status(200).json({ message: "User attempt updated", id, checkAttempt });
+    res.status(200).json({ message: "User attempt updated", questionId, checkAttempt });
   } catch (error) {
     res
       .status(500)

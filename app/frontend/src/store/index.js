@@ -1,4 +1,4 @@
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import thunk from 'redux-thunk';
 import sessionReducer from './session';
 import usersReducer from './users';
@@ -23,10 +23,21 @@ const rootReducer = combineReducers({
     // cards: cardsReducer,
 });
 
-// Create and configure the store with middleware
-const store = createStore(
-    rootReducer,
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = createStore(rootReducer, /* preloadedState, */ composeEnhancers(
+
     applyMiddleware(thunk)
-);
+));
+
 
 export default store;
+
+// Create and configure the store with middleware
+// const store = createStore(
+//     rootReducer,
+//     applyMiddleware(thunk)
+// );
+
+
+
+// export default store;

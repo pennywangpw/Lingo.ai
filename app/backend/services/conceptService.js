@@ -54,7 +54,7 @@ const addConceptToDB = async (conceptData) => {
 const updateConceptInDB = async (conceptId, updatedData) => {
     try {
         const conceptRef = doc(db, 'concepts', conceptId);
-        console.log('conceptRef: ', conceptRef);
+        // console.log('conceptRef: ', conceptRef);
         await updateDoc(conceptRef, updatedData);
         return true;
     } catch (error) {
